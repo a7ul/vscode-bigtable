@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	cloud.google.com/go/bigtable v1.13.0
+	github.com/gin-gonic/gin v1.7.7
 	google.golang.org/api v0.70.0
 )
 
@@ -18,7 +19,6 @@ require (
 	github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.1.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.7.7 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
