@@ -177,20 +177,27 @@ func GetTable(ctx context.Context, projectId string, instanceId string, tableId 
 	return toTable(projectId, instanceId, tableId, tableInfo)
 }
 
-func GetRows(ctx context.Context, projectId string, instanceId string, tableId string) []Row {
-	client, err := bigtable.NewClient(ctx, projectId, instanceId)
+type GetRowParams struct {
+	ProjectId  string
+	InstanceId string
+	TableId    string
+	RowPrefix  string
+}
+
+func GetRows(ctx context.Context, params GetRowParams) []Row {
+	client, err := bigtable.NewClient(ctx, params.ProjectId, params.InstanceId)
 	if err != nil {
 		log.Fatalf("Could not create data operations client: %v", err)
 	}
 	defer client.Close()
-	table := client.Open(tableId)
+	table := client.Open(params.TableId)
 
 	var results []Row
 
-	e := table.ReadRows(ctx, bigtable.PrefixRange(""), func(row bigtable.Row) bool {
+	e := table.ReadRows(ctx, bigtable.PrefixRange(params.RowPrefix), func(row bigtable.Row) bool {
 		results = append(results, toRow(row))
 		return true
-	}, bigtable.LimitRows(2))
+	}, bigtable.LimitRows(100))
 
 	if e != nil {
 		log.Fatalf("Could not read rows: %v", e)

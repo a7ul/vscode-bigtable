@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"atulr.com/vscode/gcloud"
+	"atulr.com/bigtable_server/internal/gcloud"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,7 +57,14 @@ func main() {
 		projectId, _ := ctx.Params.Get("projectId")
 		instanceId, _ := ctx.Params.Get("instanceId")
 		tableId, _ := ctx.Params.Get("tableId")
-		rows := gcloud.GetRows(ctx, projectId, instanceId, tableId)
+		rowPrefix, _ := ctx.GetQuery("rowPrefix")
+
+		rows := gcloud.GetRows(ctx, gcloud.GetRowParams{
+			ProjectId:  projectId,
+			InstanceId: instanceId,
+			TableId:    tableId,
+			RowPrefix:  rowPrefix,
+		})
 		ctx.JSON(http.StatusOK, rows)
 	})
 

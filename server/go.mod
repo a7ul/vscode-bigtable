@@ -1,4 +1,4 @@
-module atulr.com/vscode
+module atulr.com/bigtable_server
 
 go 1.18
 
