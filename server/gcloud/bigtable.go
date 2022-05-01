@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"cloud.google.com/go/bigtable"
+	"github.com/samber/lo"
 )
 
 type Instance struct {
@@ -33,22 +34,22 @@ type TableListItem struct {
 	TableId    string `json:"tableId"`
 }
 
-type ColumnFamily struct {
+type ColumnFamilyInfo struct {
 	Name     string `json:"name"`
 	GCPolicy string `json:"gcpolicy"`
 }
 
 type Table struct {
-	ProjectId      string         `json:"projectId"`
-	InstanceId     string         `json:"instanceId"`
-	TableId        string         `json:"tableId"`
-	ColumnFamilies []ColumnFamily `json:"columnFamilies"`
+	ProjectId      string             `json:"projectId"`
+	InstanceId     string             `json:"instanceId"`
+	TableId        string             `json:"tableId"`
+	ColumnFamilies []ColumnFamilyInfo `json:"columnFamilies"`
 }
 
 func toTable(projectId string, instanceId string, tableId string, table *bigtable.TableInfo) Table {
-	columnFamilies := make([]ColumnFamily, len(table.FamilyInfos))
+	columnFamilies := make([]ColumnFamilyInfo, len(table.FamilyInfos))
 	for i, family := range table.FamilyInfos {
-		columnFamilies[i] = ColumnFamily{
+		columnFamilies[i] = ColumnFamilyInfo{
 			Name:     family.Name,
 			GCPolicy: family.GCPolicy,
 		}
@@ -58,6 +59,49 @@ func toTable(projectId string, instanceId string, tableId string, table *bigtabl
 		InstanceId:     instanceId,
 		TableId:        tableId,
 		ColumnFamilies: columnFamilies,
+	}
+}
+
+type Cell struct {
+	Family    string             `json:"family"`
+	Column    string             `json:"column"`
+	Timestamp bigtable.Timestamp `json:"timestamp"`
+	Value     []byte             `json:"value"`
+	Labels    []string           `json:"labels"`
+}
+
+func toCell(columnFamily string, item bigtable.ReadItem) Cell {
+	return Cell{
+		Family:    columnFamily,
+		Column:    item.Column,
+		Timestamp: item.Timestamp,
+		Value:     item.Value,
+		Labels:    item.Labels,
+	}
+}
+
+type Row struct {
+	RowKey string            `json:"rowKey"`
+	Cells  map[string][]Cell `json:"cells"`
+}
+
+func toRow(row bigtable.Row) Row {
+	var cells = make(map[string][]Cell)
+
+	for columnFamily, readItems := range row {
+		groupedByColumn := lo.GroupBy(readItems, func(item bigtable.ReadItem) string {
+			return item.Column
+		})
+		for column, columnReadItems := range groupedByColumn {
+			cells[column] = lo.Map(columnReadItems, func(columItem bigtable.ReadItem, _ int) Cell {
+				return toCell(columnFamily, columItem)
+			})
+		}
+	}
+
+	return Row{
+		RowKey: row.Key(),
+		Cells:  cells,
 	}
 }
 
@@ -131,4 +175,26 @@ func GetTable(ctx context.Context, projectId string, instanceId string, tableId 
 		log.Fatalf("Could not get table: %v", e)
 	}
 	return toTable(projectId, instanceId, tableId, tableInfo)
+}
+
+func GetRows(ctx context.Context, projectId string, instanceId string, tableId string) []Row {
+	client, err := bigtable.NewClient(ctx, projectId, instanceId)
+	if err != nil {
+		log.Fatalf("Could not create data operations client: %v", err)
+	}
+	defer client.Close()
+	table := client.Open(tableId)
+
+	var results []Row
+
+	e := table.ReadRows(ctx, bigtable.PrefixRange(""), func(row bigtable.Row) bool {
+		results = append(results, toRow(row))
+		return true
+	}, bigtable.LimitRows(2))
+
+	if e != nil {
+		log.Fatalf("Could not read rows: %v", e)
+	}
+
+	return results
 }

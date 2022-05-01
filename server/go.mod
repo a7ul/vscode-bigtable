@@ -1,12 +1,14 @@
 module atulr.com/vscode
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/bigtable v1.13.0
 	github.com/gin-gonic/gin v1.7.7
 	google.golang.org/api v0.70.0
 )
+
+require golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
@@ -31,6 +33,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/samber/lo v1.19.0
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect

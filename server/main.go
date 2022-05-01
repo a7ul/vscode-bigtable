@@ -52,5 +52,14 @@ func main() {
 		table := gcloud.GetTable(ctx, projectId, instanceId, tableId)
 		ctx.JSON(http.StatusOK, table)
 	})
+
+	router.GET("/projects/:projectId/instances/:instanceId/tables/:tableId/rows", func(ctx *gin.Context) {
+		projectId, _ := ctx.Params.Get("projectId")
+		instanceId, _ := ctx.Params.Get("instanceId")
+		tableId, _ := ctx.Params.Get("tableId")
+		rows := gcloud.GetRows(ctx, projectId, instanceId, tableId)
+		ctx.JSON(http.StatusOK, rows)
+	})
+
 	router.Run(":8080")
 }
