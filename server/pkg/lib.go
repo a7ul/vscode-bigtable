@@ -1,21 +1,18 @@
-package lib
+package main
 
+// typedef void (*callback_func) (char* err, char* value);
+import "C"
 import (
-	"context"
-	"encoding/json"
+	"unsafe"
 
-	"atulr.com/bigtable_server/internal/gcloud"
+	"atulr.com/bigtable_server/internal"
 )
 
-import "C"
+//export GetProjects
+func GetProjects(cb unsafe.Pointer) {
+	internal.GetProjects2(cb)
+}
 
-// export GetProjects
-func GetProjects() string {
-	ctx := context.Background()
-	projects := gcloud.GetProjects(ctx)
-	raw, err := json.Marshal(projects)
-	if err != nil {
-		return err.Error()
-	}
-	return string(raw)
+func main() {
+
 }
