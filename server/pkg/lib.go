@@ -1,18 +1,26 @@
 package main
 
-// typedef void (*callback_func) (char* err, char* value);
 import "C"
 import (
+	"context"
 	"unsafe"
 
-	"atulr.com/bigtable_server/internal"
+	"atulr.com/bigtable_server/internal/gcloud"
+	"atulr.com/bigtable_server/internal/helpers"
 )
 
 //export GetProjects
 func GetProjects(cb unsafe.Pointer) {
-	internal.GetProjects2(cb)
+	callback := helpers.GetCallbackExecutor(cb)
+	ctx := context.Background()
+	callback(gcloud.GetProjects(ctx))
 }
 
-func main() {
-
+//export GetProject
+func GetProject(project *C.char, cb unsafe.Pointer) {
+	callback := helpers.GetCallbackExecutor(cb)
+	ctx := context.Background()
+	callback(gcloud.GetProject(ctx, C.GoString(project)))
 }
+
+func main() {}

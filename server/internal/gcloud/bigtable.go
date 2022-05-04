@@ -17,8 +17,8 @@ type Instance struct {
 	Labels        map[string]string      `json:"labels"`
 }
 
-func toInstance(projectId string, instance *bigtable.InstanceInfo) Instance {
-	return Instance{
+func toInstance(projectId string, instance *bigtable.InstanceInfo) *Instance {
+	return &Instance{
 		ProjectID:     projectId,
 		InstanceId:    instance.Name,
 		DisplayName:   instance.DisplayName,
@@ -46,7 +46,7 @@ type Table struct {
 	ColumnFamilies []ColumnFamilyInfo `json:"columnFamilies"`
 }
 
-func toTable(projectId string, instanceId string, tableId string, table *bigtable.TableInfo) Table {
+func toTable(projectId string, instanceId string, tableId string, table *bigtable.TableInfo) *Table {
 	columnFamilies := make([]ColumnFamilyInfo, len(table.FamilyInfos))
 	for i, family := range table.FamilyInfos {
 		columnFamilies[i] = ColumnFamilyInfo{
@@ -54,7 +54,7 @@ func toTable(projectId string, instanceId string, tableId string, table *bigtabl
 			GCPolicy: family.GCPolicy,
 		}
 	}
-	return Table{
+	return &Table{
 		ProjectId:      projectId,
 		InstanceId:     instanceId,
 		TableId:        tableId,
@@ -105,40 +105,40 @@ func toRow(row bigtable.Row) Row {
 	}
 }
 
-func GetInstances(ctx context.Context, projectID string) []Instance {
+func GetInstances(ctx context.Context, projectID string) ([]Instance, error) {
 	client, err := bigtable.NewInstanceAdminClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Could not create instance admin client: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 
 	instances, err := client.Instances(ctx)
 	if err != nil {
-		log.Fatalf("Could not get instances: %v", err)
+		return nil, err
 	}
 
 	var results []Instance
 	for _, instance := range instances {
-		results = append(results, toInstance(projectID, instance))
+		results = append(results, *toInstance(projectID, instance))
 	}
-	return results
+	return results, err
 }
 
-func GetInstance(ctx context.Context, projectID string, instanceId string) Instance {
+func GetInstance(ctx context.Context, projectID string, instanceId string) (*Instance, error) {
 	client, err := bigtable.NewInstanceAdminClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Could not create client: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 
-	instance, e := client.InstanceInfo(ctx, instanceId)
-	if e != nil {
-		log.Fatalf("Could not get instance: %v", e)
+	instance, err := client.InstanceInfo(ctx, instanceId)
+	if err != nil {
+		return nil, err
 	}
-	return toInstance(projectID, instance)
+	return toInstance(projectID, instance), nil
 }
 
-func GetTables(ctx context.Context, projectId string, instanceId string) []TableListItem {
+func GetTables(ctx context.Context, projectId string, instanceId string) ([]TableListItem, error) {
 	client, err := bigtable.NewAdminClient(ctx, projectId, instanceId)
 	if err != nil {
 		log.Fatalf("Could not create data operations client: %v", err)
@@ -160,21 +160,21 @@ func GetTables(ctx context.Context, projectId string, instanceId string) []Table
 		})
 	}
 
-	return results
+	return results, err
 }
 
-func GetTable(ctx context.Context, projectId string, instanceId string, tableId string) Table {
+func GetTable(ctx context.Context, projectId string, instanceId string, tableId string) (*Table, error) {
 	client, err := bigtable.NewAdminClient(ctx, projectId, instanceId)
 	if err != nil {
-		log.Fatalf("Could not create data operations client: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 
-	tableInfo, e := client.TableInfo(ctx, tableId)
-	if e != nil {
-		log.Fatalf("Could not get table: %v", e)
+	tableInfo, err := client.TableInfo(ctx, tableId)
+	if err != nil {
+		return nil, err
 	}
-	return toTable(projectId, instanceId, tableId, tableInfo)
+	return toTable(projectId, instanceId, tableId, tableInfo), nil
 }
 
 type GetRowParams struct {
@@ -184,24 +184,22 @@ type GetRowParams struct {
 	RowPrefix  string
 }
 
-func GetRows(ctx context.Context, params GetRowParams) []Row {
+func GetRows(ctx context.Context, params GetRowParams) ([]Row, error) {
 	client, err := bigtable.NewClient(ctx, params.ProjectId, params.InstanceId)
 	if err != nil {
-		log.Fatalf("Could not create data operations client: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 	table := client.Open(params.TableId)
 
 	var results []Row
 
-	e := table.ReadRows(ctx, bigtable.PrefixRange(params.RowPrefix), func(row bigtable.Row) bool {
+	if err := table.ReadRows(ctx, bigtable.PrefixRange(params.RowPrefix), func(row bigtable.Row) bool {
 		results = append(results, toRow(row))
 		return true
-	}, bigtable.LimitRows(100))
-
-	if e != nil {
-		log.Fatalf("Could not read rows: %v", e)
+	}, bigtable.LimitRows(100)); err != nil {
+		return nil, err
 	}
 
-	return results
+	return results, nil
 }

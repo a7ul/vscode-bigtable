@@ -20,8 +20,8 @@ type Project struct {
 	Parent         Parent `json:"parent"`
 }
 
-func toProject(project *cloudresourcemanager.Project) Project {
-	return Project{
+func toProject(project *cloudresourcemanager.Project) *Project {
+	return &Project{
 		CreateTime:     project.CreateTime,
 		LifecycleState: project.LifecycleState,
 		Name:           project.Name,
@@ -34,20 +34,34 @@ func toProject(project *cloudresourcemanager.Project) Project {
 	}
 }
 
-func GetProjects(ctx context.Context) []Project {
-	client, _ := cloudresourcemanager.NewService(ctx)
-	response, _ := client.Projects.List().Do()
+func GetProjects(ctx context.Context) ([]Project, error) {
+
+	client, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.Projects.List().Do()
+	if err != nil {
+		return nil, err
+	}
 
 	var results []Project
 	for _, cloudProject := range response.Projects {
-		results = append(results, toProject(cloudProject))
+		results = append(results, *toProject(cloudProject))
 	}
 
-	return results
+	return results, nil
 }
 
-func GetProject(ctx context.Context, projectId string) Project {
-	service, _ := cloudresourcemanager.NewService(ctx)
-	cloudProject, _ := service.Projects.Get(projectId).Do()
-	return toProject(cloudProject)
+func GetProject(ctx context.Context, projectId string) (*Project, error) {
+	service, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cloudProject, err := service.Projects.Get(projectId).Do()
+	if err != nil {
+		return nil, err
+	}
+	return toProject(cloudProject), nil
 }

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
 	"atulr.com/bigtable_server/internal/gcloud"
+	"atulr.com/bigtable_server/internal/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,62 +10,56 @@ func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
 
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
+	router.GET("/ping", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
+		return gin.H{"message": "pong"}, nil
+	}))
 
-	router.GET("/projects", func(ctx *gin.Context) {
-		projects := gcloud.GetProjects(ctx)
-		ctx.JSON(http.StatusOK, projects)
-	})
+	router.GET("/projects", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
+		return gcloud.GetProjects(ctx)
+	}))
 
-	router.GET("/projects/:projectId", func(ctx *gin.Context) {
+	router.GET("/projects/:projectId", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
-		project := gcloud.GetProject(ctx, projectId)
-		ctx.JSON(http.StatusOK, project)
-	})
+		return gcloud.GetProject(ctx, projectId)
+	}))
 
-	router.GET("/projects/:projectId/instances", func(ctx *gin.Context) {
+	router.GET("/projects/:projectId/instances", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
-		instances := gcloud.GetInstances(ctx, projectId)
-		ctx.JSON(http.StatusOK, instances)
-	})
+		return gcloud.GetInstances(ctx, projectId)
 
-	router.GET("/projects/:projectId/instances/:instanceId", func(ctx *gin.Context) {
+	}))
+
+	router.GET("/projects/:projectId/instances/:instanceId", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
 		instanceId, _ := ctx.Params.Get("instanceId")
-		instance := gcloud.GetInstance(ctx, projectId, instanceId)
-		ctx.JSON(http.StatusOK, instance)
-	})
-	router.GET("/projects/:projectId/instances/:instanceId/tables", func(ctx *gin.Context) {
+		return gcloud.GetInstance(ctx, projectId, instanceId)
+	}))
+	router.GET("/projects/:projectId/instances/:instanceId/tables", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
 		instanceId, _ := ctx.Params.Get("instanceId")
-		tables := gcloud.GetTables(ctx, projectId, instanceId)
-		ctx.JSON(http.StatusOK, tables)
-	})
+		return gcloud.GetTables(ctx, projectId, instanceId)
+	}))
 
-	router.GET("/projects/:projectId/instances/:instanceId/tables/:tableId", func(ctx *gin.Context) {
+	router.GET("/projects/:projectId/instances/:instanceId/tables/:tableId", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
 		instanceId, _ := ctx.Params.Get("instanceId")
 		tableId, _ := ctx.Params.Get("tableId")
-		table := gcloud.GetTable(ctx, projectId, instanceId, tableId)
-		ctx.JSON(http.StatusOK, table)
-	})
+		return gcloud.GetTable(ctx, projectId, instanceId, tableId)
+	}))
 
-	router.GET("/projects/:projectId/instances/:instanceId/tables/:tableId/rows", func(ctx *gin.Context) {
+	router.GET("/projects/:projectId/instances/:instanceId/tables/:tableId/rows", helpers.RouteHandler(func(ctx *gin.Context) (any, error) {
 		projectId, _ := ctx.Params.Get("projectId")
 		instanceId, _ := ctx.Params.Get("instanceId")
 		tableId, _ := ctx.Params.Get("tableId")
 		rowPrefix, _ := ctx.GetQuery("rowPrefix")
 
-		rows := gcloud.GetRows(ctx, gcloud.GetRowParams{
+		return gcloud.GetRows(ctx, gcloud.GetRowParams{
 			ProjectId:  projectId,
 			InstanceId: instanceId,
 			TableId:    tableId,
 			RowPrefix:  rowPrefix,
 		})
-		ctx.JSON(http.StatusOK, rows)
-	})
+	}))
 
 	router.Run(":8080")
 }
