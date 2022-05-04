@@ -3,8 +3,12 @@ package gcloud
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
+
+// use a single instance of Validate, it caches struct info
+var validate = validator.New()
 
 type Parent struct {
 	Id   string `json:"id"`
@@ -54,12 +58,19 @@ func GetProjects(ctx context.Context) ([]Project, error) {
 	return results, nil
 }
 
-func GetProject(ctx context.Context, projectId string) (*Project, error) {
+type GetProjectParams struct {
+	ProjectId string `json:"projectId" validate:"required"`
+}
+
+func GetProject(ctx context.Context, params GetProjectParams) (*Project, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
 	service, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
-	cloudProject, err := service.Projects.Get(projectId).Do()
+	cloudProject, err := service.Projects.Get(params.ProjectId).Do()
 	if err != nil {
 		return nil, err
 	}

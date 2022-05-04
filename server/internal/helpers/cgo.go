@@ -33,8 +33,24 @@ func ExecutePointerCallback(cb unsafe.Pointer, value any, err error) {
 	}
 }
 
-func GetCallbackExecutor(cb unsafe.Pointer) func(value any, err error) {
+type Callback func(value any, err error)
+
+func ToCallback(cb unsafe.Pointer) Callback {
 	return func(value any, err error) {
 		ExecutePointerCallback(cb, value, err)
+	}
+}
+
+func CreateParser[T any](cb unsafe.Pointer, rawParams string, parsedParams T) func(onParse func(params T, callback Callback)) {
+	return func(onParse func(params T, callback Callback)) {
+		callback := ToCallback(cb)
+		err := json.Unmarshal([]byte(rawParams), &parsedParams)
+		if err != nil {
+			callback(nil, err)
+		} else {
+			go func(parsedParams T, callback Callback) {
+				onParse(parsedParams, callback)
+			}(parsedParams, callback)
+		}
 	}
 }

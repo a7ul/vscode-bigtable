@@ -104,8 +104,16 @@ func toRow(row bigtable.Row) Row {
 	}
 }
 
-func GetInstances(ctx context.Context, projectID string) ([]Instance, error) {
-	client, err := bigtable.NewInstanceAdminClient(ctx, projectID)
+type GetInstancesParams struct {
+	ProjectId string `json:"projectId" validate:"required"`
+}
+
+func GetInstances(ctx context.Context, params GetInstancesParams) ([]Instance, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
+
+	client, err := bigtable.NewInstanceAdminClient(ctx, params.ProjectId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,27 +126,43 @@ func GetInstances(ctx context.Context, projectID string) ([]Instance, error) {
 
 	var results []Instance
 	for _, instance := range instances {
-		results = append(results, *toInstance(projectID, instance))
+		results = append(results, *toInstance(params.ProjectId, instance))
 	}
 	return results, err
 }
 
-func GetInstance(ctx context.Context, projectID string, instanceId string) (*Instance, error) {
-	client, err := bigtable.NewInstanceAdminClient(ctx, projectID)
+type GetInstanceParams struct {
+	ProjectId  string `json:"projectId" validate:"required"`
+	InstanceId string `json:"instanceId" validate:"required"`
+}
+
+func GetInstance(ctx context.Context, params GetInstanceParams) (*Instance, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
+	client, err := bigtable.NewInstanceAdminClient(ctx, params.ProjectId)
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	instance, err := client.InstanceInfo(ctx, instanceId)
+	instance, err := client.InstanceInfo(ctx, params.InstanceId)
 	if err != nil {
 		return nil, err
 	}
-	return toInstance(projectID, instance), nil
+	return toInstance(params.ProjectId, instance), nil
 }
 
-func GetTables(ctx context.Context, projectId string, instanceId string) ([]TableListItem, error) {
-	client, err := bigtable.NewAdminClient(ctx, projectId, instanceId)
+type GetTablesParams struct {
+	ProjectId  string `json:"projectId" validate:"required"`
+	InstanceId string `json:"instanceId" validate:"required"`
+}
+
+func GetTables(ctx context.Context, params GetTablesParams) ([]TableListItem, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
+	client, err := bigtable.NewAdminClient(ctx, params.ProjectId, params.InstanceId)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +177,8 @@ func GetTables(ctx context.Context, projectId string, instanceId string) ([]Tabl
 	var results []TableListItem
 	for _, tableId := range tableList {
 		results = append(results, TableListItem{
-			ProjectId:  projectId,
-			InstanceId: instanceId,
+			ProjectId:  params.ProjectId,
+			InstanceId: params.InstanceId,
 			TableId:    tableId,
 		})
 	}
@@ -162,28 +186,40 @@ func GetTables(ctx context.Context, projectId string, instanceId string) ([]Tabl
 	return results, err
 }
 
-func GetTable(ctx context.Context, projectId string, instanceId string, tableId string) (*Table, error) {
-	client, err := bigtable.NewAdminClient(ctx, projectId, instanceId)
+type GetTableParams struct {
+	ProjectId  string `json:"projectId" validate:"required"`
+	InstanceId string `json:"instanceId" validate:"required"`
+	TableId    string `json:"tableId" validate:"required"`
+}
+
+func GetTable(ctx context.Context, params GetTableParams) (*Table, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
+	client, err := bigtable.NewAdminClient(ctx, params.ProjectId, params.InstanceId)
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	tableInfo, err := client.TableInfo(ctx, tableId)
+	tableInfo, err := client.TableInfo(ctx, params.TableId)
 	if err != nil {
 		return nil, err
 	}
-	return toTable(projectId, instanceId, tableId, tableInfo), nil
+	return toTable(params.ProjectId, params.InstanceId, params.TableId, tableInfo), nil
 }
 
 type GetRowParams struct {
-	ProjectId  string
-	InstanceId string
-	TableId    string
-	RowPrefix  string
+	ProjectId  string `json:"projectId" validate:"required"`
+	InstanceId string `json:"instanceId" validate:"required"`
+	TableId    string `json:"tableId" validate:"required"`
+	RowPrefix  string `json:"rowPrefix"`
 }
 
 func GetRows(ctx context.Context, params GetRowParams) ([]Row, error) {
+	if err := validate.Struct(params); err != nil {
+		return nil, err
+	}
 	client, err := bigtable.NewClient(ctx, params.ProjectId, params.InstanceId)
 	if err != nil {
 		return nil, err
