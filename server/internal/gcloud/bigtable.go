@@ -2,7 +2,6 @@ package gcloud
 
 import (
 	"context"
-	"log"
 
 	"cloud.google.com/go/bigtable"
 	"github.com/samber/lo"
@@ -141,14 +140,14 @@ func GetInstance(ctx context.Context, projectID string, instanceId string) (*Ins
 func GetTables(ctx context.Context, projectId string, instanceId string) ([]TableListItem, error) {
 	client, err := bigtable.NewAdminClient(ctx, projectId, instanceId)
 	if err != nil {
-		log.Fatalf("Could not create data operations client: %v", err)
+		return nil, err
 	}
 	defer client.Close()
 
-	tableList, e := client.Tables(ctx)
+	tableList, err := client.Tables(ctx)
 
-	if e != nil {
-		log.Fatalf("Could not get tables: %v", e)
+	if err != nil {
+		return nil, err
 	}
 
 	var results []TableListItem
