@@ -5,6 +5,3 @@ server:
 
 lib:
 	go build -buildmode=c-shared -o ./dist/libserver.dylib  ./pkg/lib.go
-
-temp: lib
-	node ./dist/test.js

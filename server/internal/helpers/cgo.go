@@ -3,10 +3,9 @@ package helpers
 // #include <stdlib.h>
 // typedef void (*callback_func) (char* err, char* value);
 //
-// void bridge_callback_func(callback_func f, char* err, char* value){
-//   f(err, value);
+// void bridge_callback_func(callback_func cb, char* err, char* value){
+//   cb(err, value);
 // }
-//
 import "C"
 import (
 	"encoding/json"
@@ -48,9 +47,11 @@ func CreateParser[T any](cb unsafe.Pointer, rawParams string, parsedParams T) fu
 		if err != nil {
 			callback(nil, err)
 		} else {
-			go func(parsedParams T, callback Callback) {
-				onParse(parsedParams, callback)
-			}(parsedParams, callback)
+			// TODO: The callback gets gc'ed in node-ffi hence, making in sync for now
+			// go func(parsedParams T, callback Callback) {
+			// 	onParse(parsedParams, callback)
+			// }(parsedParams, callback)
+			onParse(parsedParams, callback)
 		}
 	}
 }

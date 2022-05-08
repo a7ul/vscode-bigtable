@@ -1,95 +1,115 @@
+import { Table } from "@google-cloud/bigtable";
+import { randomUUID } from "crypto";
 import * as vscode from "vscode";
-import * as fs from "fs";
-import * as path from "path";
+import {
+  getInstances,
+  getProjects,
+  getTables,
+  Instance,
+  Project,
+} from "../services/backend";
 
-export class NodeDependenciesProvider
-  implements vscode.TreeDataProvider<Dependency>
+export class BigtableTreeDataProvider
+  implements vscode.TreeDataProvider<BigtableTreeItem>
 {
-  constructor(private workspaceRoot: string) {}
+  context: vscode.ExtensionContext;
 
-  getTreeItem(element: Dependency): vscode.TreeItem {
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+  }
+
+  getTreeItem(element: BigtableTreeItem): vscode.TreeItem {
     return element;
   }
 
-  getChildren(element?: Dependency): Thenable<Dependency[]> {
-    if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage("No dependency in empty workspace");
-      return Promise.resolve([]);
-    }
-
-    if (element) {
-      return Promise.resolve(
-        this.getDepsInPackageJson(
-          path.join(
-            this.workspaceRoot,
-            "node_modules",
-            element.label,
-            "package.json"
-          )
-        )
+  async getChildren(element?: BigtableTreeItem): Promise<BigtableTreeItem[]> {
+    if (!element) {
+      const projects = await getProjects();
+      return projects.map(
+        (project) => new ProjectTreeItem(this.context, project)
       );
-    } else {
-      const packageJsonPath = path.join(this.workspaceRoot, "package.json");
-      if (this.pathExists(packageJsonPath)) {
-        return Promise.resolve(this.getDepsInPackageJson(packageJsonPath));
-      } else {
-        vscode.window.showInformationMessage("Workspace has no package.json");
-        return Promise.resolve([]);
-      }
     }
-  }
-
-  /**
-   * Given the path to package.json, read all its dependencies and devDependencies.
-   */
-  private getDepsInPackageJson(packageJsonPath: string): Dependency[] {
-    if (this.pathExists(packageJsonPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
-
-      const toDep = (moduleName: string, version: string): Dependency => {
-        if (
-          this.pathExists(
-            path.join(this.workspaceRoot, "node_modules", moduleName)
-          )
-        ) {
-          return new Dependency(
-            moduleName,
-            version,
-            vscode.TreeItemCollapsibleState.Collapsed
-          );
-        } else {
-          return new Dependency(
-            moduleName,
-            version,
-            vscode.TreeItemCollapsibleState.None
-          );
-        }
-      };
-
-      const deps = packageJson.dependencies
-        ? Object.keys(packageJson.dependencies).map((dep) =>
-            toDep(dep, packageJson.dependencies[dep])
-          )
-        : [];
-      const devDeps = packageJson.devDependencies
-        ? Object.keys(packageJson.devDependencies).map((dep) =>
-            toDep(dep, packageJson.devDependencies[dep])
-          )
-        : [];
-      return deps.concat(devDeps);
-    } else {
-      return [];
-    }
-  }
-
-  private pathExists(p: string): boolean {
-    try {
-      fs.accessSync(p);
-    } catch (err) {
-      return false;
-    }
-    return true;
+    return element.getChildren();
   }
 }
 
-class BigtableTreeItem extends vscode.TreeItem {}
+abstract class BigtableTreeItem extends vscode.TreeItem {
+  abstract context: vscode.ExtensionContext;
+  abstract getChildren(): Promise<BigtableTreeItem[]>;
+
+  // @ts-ignore
+  get resourceUri() {
+    return vscode.Uri.joinPath(this.context.extensionUri, "resources");
+  }
+}
+
+class ProjectTreeItem extends BigtableTreeItem {
+  context: vscode.ExtensionContext;
+  project: Project;
+  constructor(context: vscode.ExtensionContext, project: Project) {
+    const label = project.displayName ?? project.name ?? "Unknown";
+    super(label, vscode.TreeItemCollapsibleState.Collapsed);
+    this.context = context;
+    this.project = project;
+    this.id = this.project.projectId ?? randomUUID();
+    this.iconPath = vscode.Uri.joinPath(this.resourceUri, "gcp-project.svg");
+    this.description = this.project.projectId ?? false;
+    this.tooltip = this.project.projectId ?? undefined;
+  }
+  async getChildren(): Promise<BigtableTreeItem[]> {
+    if (!this.project?.projectId) {
+      return [];
+    }
+    const instances = await getInstances({ projectId: this.project.projectId });
+    return instances.map((i) => new InstanceTreeItem(this.context, i));
+  }
+}
+
+class InstanceTreeItem extends BigtableTreeItem {
+  context: vscode.ExtensionContext;
+  instance: Instance;
+
+  constructor(context: vscode.ExtensionContext, instance: Instance) {
+    const label = instance.id;
+    super(label, vscode.TreeItemCollapsibleState.Collapsed);
+    this.context = context;
+    this.instance = instance;
+    this.id = `${this.instance.bigtable.projectId}_${this.instance.id}`;
+    this.iconPath = vscode.Uri.joinPath(this.resourceUri, "bigtable.svg");
+    this.description = this.instance.name ?? false;
+    this.tooltip = this.instance.name ?? undefined;
+  }
+
+  async getChildren(): Promise<BigtableTreeItem[]> {
+    const tables = await getTables({
+      instanceId: this.instance.id,
+      projectId: this.instance.bigtable.projectId,
+    });
+    return tables.map((t) => new TableTreeItem(this.context, t));
+  }
+}
+
+class TableTreeItem extends BigtableTreeItem {
+  context: vscode.ExtensionContext;
+  table: Table;
+
+  constructor(context: vscode.ExtensionContext, table: Table) {
+    const label = table.id;
+    super(label);
+    this.context = context;
+    this.table = table;
+    this.id = `${this.table.instance.id}_${this.table.bigtable.projectId}_${this.table.id}`;
+    this.iconPath = vscode.Uri.joinPath(this.resourceUri, "table.svg");
+    this.description = this.table.name ?? false;
+    this.tooltip = this.table.name ?? undefined;
+    this.command = {
+      title: "Open Table",
+      command: "vscodeBigtable_command_openTable",
+      arguments: [this.table],
+    };
+  }
+
+  async getChildren(): Promise<BigtableTreeItem[]> {
+    return [];
+  }
+}
