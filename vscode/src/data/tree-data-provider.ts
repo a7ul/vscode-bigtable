@@ -1,4 +1,3 @@
-import { Table } from "@google-cloud/bigtable";
 import { randomUUID } from "crypto";
 import * as vscode from "vscode";
 import {
@@ -7,6 +6,7 @@ import {
   getTables,
   Instance,
   Project,
+  Table,
 } from "../services/backend";
 
 export class BigtableTreeDataProvider
@@ -89,7 +89,7 @@ class InstanceTreeItem extends BigtableTreeItem {
   }
 }
 
-class TableTreeItem extends BigtableTreeItem {
+export class TableTreeItem extends BigtableTreeItem {
   context: vscode.ExtensionContext;
   table: Table;
 
@@ -98,14 +98,14 @@ class TableTreeItem extends BigtableTreeItem {
     super(label);
     this.context = context;
     this.table = table;
-    this.id = `${this.table.instance.id}_${this.table.bigtable.projectId}_${this.table.id}`;
+    this.id = this.table.name;
     this.iconPath = vscode.Uri.joinPath(this.resourceUri, "table.svg");
     this.description = this.table.name ?? false;
     this.tooltip = this.table.name ?? undefined;
     this.command = {
-      title: "Open Table",
+      title: "Open Bigtable Table",
       command: "vscodeBigtable_command_openTable",
-      arguments: [this.table],
+      arguments: [this.table.name, this.table.id],
     };
   }
 

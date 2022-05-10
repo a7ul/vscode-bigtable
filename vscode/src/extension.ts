@@ -1,25 +1,30 @@
 import * as vscode from "vscode";
 import { BigtableTreeDataProvider } from "./data/tree-data-provider";
+import { WebviewEngine } from "./services/webview";
 
 export function activate(context: vscode.ExtensionContext) {
-  const debugMessage = vscode.commands.registerCommand(
-    "vscodeBigtable_command_openTable",
-    function (args) {
-      // This is a command to execute
-      const date = new Date();
-      vscode.window.showInformationMessage(
-        "Debug called at " + date.toLocaleString()
-      );
-    }
-  );
+  const panelEngine = new WebviewEngine(context);
 
-  // Active tree view
-  const treeview = vscode.window.registerTreeDataProvider(
+  const projectsListTreeview = vscode.window.registerTreeDataProvider(
     "vscodeBigtable_views_bigtableProjectsList",
     new BigtableTreeDataProvider(context)
   );
 
-  context.subscriptions.push(treeview, debugMessage);
+  const openTableCommand = vscode.commands.registerCommand(
+    "vscodeBigtable_command_openTable",
+    async (tableId = "New", title = tableId) => {
+      const type = `table:${tableId}`;
+      const panel = panelEngine.setupPanel(type, title, vscode.ViewColumn.One, {
+        enableScripts: true,
+        localResourceRoots: [
+          vscode.Uri.file(panelEngine.getLocalWebAssetsDir()),
+        ],
+      });
+      const html = await panelEngine.loadLocalWebviewHtml("query");
+      panel.webview.html = html;
+    }
+  );
+  context.subscriptions.push(projectsListTreeview, openTableCommand);
 }
 
 // this method is called when your extension is deactivated
