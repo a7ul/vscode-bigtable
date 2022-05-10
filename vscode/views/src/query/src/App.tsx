@@ -8,7 +8,8 @@ import styled from "@emotion/styled";
 import { Padding } from "./styling";
 
 const RootContainer = styled.main`
-  padding: ${Padding.large}px 0;
+  padding: 0;
+  padding-top: ${Padding.large}px;
   flex: 1;
   display: flex;
 `;

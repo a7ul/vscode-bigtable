@@ -16,12 +16,14 @@ export function activate(context: vscode.ExtensionContext) {
       const type = `table:${tableId}`;
       const panel = panelEngine.setupPanel(type, title, vscode.ViewColumn.One, {
         enableScripts: true,
-        localResourceRoots: [
-          vscode.Uri.file(panelEngine.getLocalWebAssetsDir()),
-        ],
+        localResourceRoots: [vscode.Uri.file(panelEngine.getWebviewSrcDir())],
       });
-      const html = await panelEngine.loadLocalWebviewHtml("query");
-      panel.webview.html = html;
+      panel.iconPath = vscode.Uri.joinPath(
+        context.extensionUri,
+        "resources",
+        "table.svg"
+      );
+      panel.webview.html = await panelEngine.loadLocalWebviewHtml("query");
     }
   );
   context.subscriptions.push(projectsListTreeview, openTableCommand);

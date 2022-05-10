@@ -38,7 +38,7 @@ export class WebviewEngine {
     return this.#createNewPanel(...params);
   }
 
-  getLocalWebAssetsDir() {
+  getWebviewSrcDir() {
     return path.join(this.context.extensionPath, "views", "dist");
   }
   async loadLocalWebviewHtml(view: string) {
@@ -46,8 +46,8 @@ export class WebviewEngine {
       const response = await fetch("http://localhost:6001/" + view);
       return response.text();
     }
-    const assetDirPath = path.join(this.getLocalWebAssetsDir(), view);
-    const htmlDiskPath = vscode.Uri.file(path.join(assetDirPath, "index.html"));
+    const webviewDir = path.join(this.getWebviewSrcDir(), view);
+    const htmlDiskPath = vscode.Uri.file(path.join(webviewDir, "index.html"));
     return fs.readFile(htmlDiskPath.path, "utf-8");
   }
 }
