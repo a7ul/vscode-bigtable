@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { BigtableTreeDataProvider } from "./data/tree-data-provider";
 import { WebviewEngine } from "./services/webview";
+import { addApiMessageHandler } from "./utils/message";
 
 export function activate(context: vscode.ExtensionContext) {
   const panelEngine = new WebviewEngine(context);
@@ -24,6 +25,15 @@ export function activate(context: vscode.ExtensionContext) {
         "table.svg"
       );
       panel.webview.html = await panelEngine.loadLocalWebviewHtml("query");
+
+      addApiMessageHandler(context, panel, async (message) => {
+        switch (message.key) {
+          case "PING": {
+            return { pong: true };
+          }
+        }
+        return null;
+      });
     }
   );
   context.subscriptions.push(projectsListTreeview, openTableCommand);

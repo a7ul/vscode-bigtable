@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
 import { Spacer } from "../components/spacer";
 import { Padding } from "../styling";
+import { api } from "../../../utils/message";
 
 const TextArea = styled.textarea`
   resize: none;
@@ -29,13 +30,22 @@ const ActionContainer = styled.div`
 `;
 
 export function Editor() {
+  const onClick = () => {
+    const t = api.request("PING", {});
+    api.debug();
+    t.then((res) => console.log("RECEIVED response", res))
+      .catch((err) => console.log("ERROR", err))
+      .finally(() => {
+        api.debug();
+      });
+  };
   return (
     <Container>
       <TextArea autoFocus placeholder="Enter rowKey" />
       <ActionContainer>
         <VSCodeButton>Cancel</VSCodeButton>
         <Spacer width={8} />
-        <VSCodeButton>Execute</VSCodeButton>
+        <VSCodeButton onClick={onClick}>Execute</VSCodeButton>
       </ActionContainer>
     </Container>
   );

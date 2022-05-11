@@ -1,5 +1,5 @@
-import React from "react";
-
+import React, { useEffect } from "react";
+import { api } from "../../utils/message";
 import { Editor } from "./sections/editor";
 
 import { Results } from "./sections/result";
