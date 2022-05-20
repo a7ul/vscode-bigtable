@@ -1,11 +1,11 @@
-export enum ApiMessageType {
+export enum MessageType {
   REQUEST = "REQUEST",
   RESPONSE = "RESPONSE",
   ERROR = "ERROR",
 }
-export type ApiMessage<T extends Record<string, any> = any> = {
-  key: string;
+export type Message<T extends Record<string, any> = any> = {
+  route: string;
   requestId: string;
-  type: ApiMessageType;
-  extra: T;
+  type: MessageType;
+  payload: T;
 };

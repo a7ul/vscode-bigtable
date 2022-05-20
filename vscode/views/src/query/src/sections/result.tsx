@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { client } from "../../../utils/messages";
+import { QueryPageContext } from "../hooks/QueryPageContext";
 import { Colors, Padding } from "../styling";
 
 const Container = styled.section`
@@ -17,10 +19,27 @@ const ResultView = styled.code`
 `;
 
 export function Results() {
+  const [results, setResults] = useState<string>();
+  const ctx = useContext(QueryPageContext);
+  useEffect(() => {
+    async function main() {
+      if (!ctx) {
+        return;
+      }
+      const results = await client.request("getRows", {
+        projectId: ctx.projectId,
+        instanceId: ctx.instanceId,
+        tableId: ctx.tableId,
+      });
+      setResults(JSON.stringify(results));
+    }
+    main().catch((err) => console.error(err));
+  }, []);
   return (
     <Container>
       <ResultView>
-        {`
+        {results ??
+          `
           {
             "name": "John"
           }

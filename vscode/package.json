@@ -18,7 +18,7 @@
     "commands": [
       {
         "command": "vscodeBigtable_command_openTable",
-        "title": "Open Bigtable Query UI for table"
+        "title": "Open Bigtable"
       }
     ],
     "viewsContainers": {

@@ -7,7 +7,7 @@ import {
   Instance,
   Project,
   Table,
-} from "../services/backend";
+} from "../utils/bigtable";
 
 export class BigtableTreeDataProvider
   implements vscode.TreeDataProvider<BigtableTreeItem>
@@ -105,7 +105,11 @@ export class TableTreeItem extends BigtableTreeItem {
     this.command = {
       title: "Open Bigtable Table",
       command: "vscodeBigtable_command_openTable",
-      arguments: [this.table.name, this.table.id],
+      arguments: [
+        this.table.instance.bigtable.projectId,
+        this.table.instance.id,
+        this.table.id,
+      ],
     };
   }
 

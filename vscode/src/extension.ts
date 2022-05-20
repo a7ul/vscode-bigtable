@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import { BigtableTreeDataProvider } from "./data/tree-data-provider";
-import { WebviewEngine } from "./services/webview";
-import { addApiMessageHandler } from "./utils/message";
+import { BigtableTreeDataProvider } from "./components/tree-data-provider";
+import { getTable } from "./utils/bigtable";
+import { WebviewEngine } from "./utils/webview";
 
 export function activate(context: vscode.ExtensionContext) {
-  const panelEngine = new WebviewEngine(context);
+  const webviewEngine = new WebviewEngine(context);
 
   const projectsListTreeview = vscode.window.registerTreeDataProvider(
     "vscodeBigtable_views_bigtableProjectsList",
@@ -13,27 +13,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   const openTableCommand = vscode.commands.registerCommand(
     "vscodeBigtable_command_openTable",
-    async (tableId = "New", title = tableId) => {
-      const type = `table:${tableId}`;
-      const panel = panelEngine.setupPanel(type, title, vscode.ViewColumn.One, {
-        enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(panelEngine.getWebviewSrcDir())],
-      });
-      panel.iconPath = vscode.Uri.joinPath(
-        context.extensionUri,
-        "resources",
-        "table.svg"
-      );
-      panel.webview.html = await panelEngine.loadLocalWebviewHtml("query");
-
-      addApiMessageHandler(context, panel, async (message) => {
-        switch (message.key) {
-          case "PING": {
-            return { pong: true };
-          }
-        }
-        return null;
-      });
+    async (projectId, instanceId, tableId) => {
+      try {
+        const tableInfo = { projectId, instanceId, tableId };
+        const table = await getTable(tableInfo);
+        await webviewEngine.createTablePanel(table);
+      } catch (err: any) {
+        vscode.window.showErrorMessage(
+          `Error: Unable to open bigtable view. ${err.message}`,
+          "Dismiss"
+        );
+      }
     }
   );
   context.subscriptions.push(projectsListTreeview, openTableCommand);
