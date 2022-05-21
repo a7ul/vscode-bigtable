@@ -1,5 +1,7 @@
 # vscode-bigtable
 
+<img src="https://raw.githubusercontent.com/a7ul/vscode-bigtable/main/resources/bigtable.svg" width="60" />
+
 VSCode extension to query and manage Google Bigtable instances.
 
 ## Features
