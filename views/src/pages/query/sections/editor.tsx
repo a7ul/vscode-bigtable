@@ -41,7 +41,7 @@ export function Editor(props: Props) {
       <ActionContainer>
         <VSCodeButton
           onClick={() =>
-            props.onExecute({ keys: [textAreaRef.current!.value] })
+            props.onExecute({ prefix: textAreaRef.current!.value })
           }
         >
           Execute
