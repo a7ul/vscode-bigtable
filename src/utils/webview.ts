@@ -25,7 +25,7 @@ export class WebviewEngine {
       return response.text();
     }
     const htmlDiskPath = vscode.Uri.file(
-      path.join(this.context.extensionPath, "views", "dist", "index.html")
+      path.join(this.context.extensionPath, "resources", "index.html")
     );
     return fs.readFile(htmlDiskPath.path, "utf-8");
   }
