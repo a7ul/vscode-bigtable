@@ -13,8 +13,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   const openTableCommand = vscode.commands.registerCommand(
     "vscodeBigtable_command_openTable",
-    async (projectId, instanceId, tableId) => {
+    async (...args) => {
       try {
+        const projectId = args[0];
+        const instanceId = args[1];
+        const tableId = args[2];
+
+        if (!projectId || !instanceId || !tableId) {
+          await webviewEngine.createConfigurePanel();
+          return;
+        }
+
         const tableInfo = { projectId, instanceId, tableId };
         const table = await getTable(tableInfo);
         await webviewEngine.createTablePanel(table);

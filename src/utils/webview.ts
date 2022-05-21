@@ -9,7 +9,7 @@ import {
 import { createRouter } from "../routes";
 import { Table } from "../utils/bigtable";
 
-const DEV = false;
+const DEV = true;
 
 export class WebviewEngine {
   context: vscode.ExtensionContext;
@@ -81,6 +81,47 @@ export class WebviewEngine {
     panel.onDidDispose(
       () => {
         delete this.panels[tableId];
+      },
+      undefined,
+      this.context.subscriptions
+    );
+    return panel;
+  }
+
+  async createConfigurePanel() {
+    const panelId = "configure:view";
+
+    if (this.panels[panelId]) {
+      return this.panels[panelId];
+    }
+    const type = "CONFIGURE";
+    const panel = vscode.window.createWebviewPanel(
+      type,
+      "Bigtable",
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        localResourceRoots: [
+          vscode.Uri.file(path.resolve(this.context.extensionPath, "views")),
+        ],
+      }
+    );
+    panel.iconPath = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "resources",
+      "setting.svg"
+    );
+
+    const context = { page: "configure" };
+    this.setupMessageQueue(panel, createRouter(context));
+    panel.webview.html = await this.loadLocalWebviewHtml();
+
+    this.context.subscriptions.push(panel);
+    this.panels[panelId] = panel;
+
+    panel.onDidDispose(
+      () => {
+        delete this.panels[panelId];
       },
       undefined,
       this.context.subscriptions

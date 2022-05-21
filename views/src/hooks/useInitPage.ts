@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../utils/messages";
 
-export type PageContextValue = QueryPageContextValue;
+export type PageContextValue =
+  | QueryPageContextValue
+  | ConfigurePageContextValue;
 
 export type QueryPageContextValue = {
   page: "query";
@@ -10,6 +12,9 @@ export type QueryPageContextValue = {
     instanceId: string;
     tableId: string;
   };
+};
+export type ConfigurePageContextValue = {
+  page: "configure";
 };
 
 export const PageContext = React.createContext<PageContextValue | null>(null);
