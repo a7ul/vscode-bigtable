@@ -9,7 +9,7 @@ import {
   Table,
 } from "../utils/bigtable";
 
-export class BigtableTreeDataProvider
+export class GCPBigtableTreeDataProvider
   implements vscode.TreeDataProvider<BigtableTreeItem>
 {
   context: vscode.ExtensionContext;
@@ -103,12 +103,14 @@ export class TableTreeItem extends BigtableTreeItem {
     this.description = this.table.name ?? false;
     this.tooltip = this.table.name ?? undefined;
     this.command = {
-      title: "Open Bigtable Table",
-      command: "vscodeBigtable_command_openTable",
+      title: "Add Bigtable Table",
+      command: "vscodeBigtable_command_addTable",
       arguments: [
-        this.table.instance.bigtable.projectId,
-        this.table.instance.id,
-        this.table.id,
+        this.table.name, // id
+        this.table.bigtable.projectId, // projectId
+        this.table.instance.id, // instanceId
+        this.table.id, // tableId
+        this.table.id, // displayName
       ],
     };
   }

@@ -27,7 +27,7 @@ export function QueryPage(props: Props) {
     <RootContainer>
       <SplitPane.Container>
         <SplitPane.Pane>
-          <Editor onExecute={(prefix) => getRows({ prefix })} />
+          <Editor onExecute={(options) => getRows(options)} />
         </SplitPane.Pane>
         <SplitPane.Pane>
           <Results rows={rows} />

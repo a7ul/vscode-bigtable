@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
 import { Spacer } from "../../../components/spacer";
 import { Padding } from "../../../styling";
+import { GetRowsOptions } from "@google-cloud/bigtable";
 
 const TextArea = styled.textarea`
   resize: none;
@@ -29,7 +30,8 @@ const ActionContainer = styled.div`
 `;
 
 type Props = {
-  onExecute: (prefix: string) => void;
+  loading?: boolean;
+  onExecute: (options: GetRowsOptions) => void;
 };
 export function Editor(props: Props) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -37,10 +39,10 @@ export function Editor(props: Props) {
     <Container>
       <TextArea ref={textAreaRef} autoFocus placeholder="Enter rowKey" />
       <ActionContainer>
-        <VSCodeButton>Cancel</VSCodeButton>
-        <Spacer width={8} />
         <VSCodeButton
-          onClick={() => props.onExecute(textAreaRef.current?.value ?? "")}
+          onClick={() =>
+            props.onExecute({ keys: [textAreaRef.current!.value] })
+          }
         >
           Execute
         </VSCodeButton>

@@ -7,7 +7,7 @@ import {
   createWebviewMessageQueueBackend,
 } from "./messages";
 import { createRouter } from "../routes";
-import { Table } from "../utils/bigtable";
+import { StoredTableInfo } from "./storage";
 
 const DEV = true;
 
@@ -22,7 +22,8 @@ export class WebviewEngine {
   async loadLocalWebviewHtml() {
     if (DEV) {
       const response = await fetch("http://localhost:6001/index.html");
-      return response.text();
+      const html = await response.text();
+      return html;
     }
     const htmlDiskPath = vscode.Uri.file(
       path.join(this.context.extensionPath, "resources", "index.html")
@@ -35,21 +36,14 @@ export class WebviewEngine {
     listen(this.context, panel);
   }
 
-  getTableId(table: Table): string {
-    const id = `table:${table.bigtable.projectId}/${table.instance.id}/${table.id}`;
-    return id;
-  }
-
-  async createTablePanel(table: Table) {
-    const tableId = this.getTableId(table);
-
-    if (this.panels[tableId]) {
-      return this.panels[tableId];
+  async createTablePanel(tableInfo: StoredTableInfo) {
+    if (this.panels[tableInfo.id]) {
+      return this.panels[tableInfo.id];
     }
-    const type = "TABLE";
+
     const panel = vscode.window.createWebviewPanel(
-      type,
-      table.id,
+      "TABLE",
+      tableInfo.displayName,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -64,23 +58,19 @@ export class WebviewEngine {
       "table.svg"
     );
 
-    const context = {
+    const pageContext = {
       page: "query",
-      table: {
-        projectId: table.bigtable.projectId,
-        instanceId: table.instance.id,
-        tableId: table.id,
-      },
+      table: tableInfo,
     };
-    this.setupMessageQueue(panel, createRouter(context));
+    this.setupMessageQueue(panel, createRouter(pageContext));
     panel.webview.html = await this.loadLocalWebviewHtml();
 
     this.context.subscriptions.push(panel);
-    this.panels[tableId] = panel;
+    this.panels[tableInfo.id] = panel;
 
     panel.onDidDispose(
       () => {
-        delete this.panels[tableId];
+        delete this.panels[tableInfo.id];
       },
       undefined,
       this.context.subscriptions
@@ -94,9 +84,9 @@ export class WebviewEngine {
     if (this.panels[panelId]) {
       return this.panels[panelId];
     }
-    const type = "CONFIGURE";
+
     const panel = vscode.window.createWebviewPanel(
-      type,
+      "CONFIGURE",
       "Bigtable",
       vscode.ViewColumn.One,
       {

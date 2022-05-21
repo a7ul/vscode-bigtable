@@ -16,7 +16,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:vscodeBigtable_views_bigtableProjectsList",
+    "onView:vscodeBigtable_views_gcpProjectsList",
+    "onView:vscodeBigtable_views_addedTableList",
+    "onCommand:vscodeBigtable_command_addTable",
     "onCommand:vscodeBigtable_command_openTable"
   ],
   "main": "./out/extension.js",
@@ -25,6 +27,11 @@
       {
         "command": "vscodeBigtable_command_openTable",
         "title": "Open Bigtable"
+      },
+      {
+        "command": "vscodeBigtable_command_addTable",
+        "title": "Add Bigtable",
+        "enablement": "false"
       }
     ],
     "viewsContainers": {
@@ -39,8 +46,12 @@
     "views": {
       "vscodeBigtable_viewContainers_activitybar": [
         {
-          "id": "vscodeBigtable_views_bigtableProjectsList",
-          "name": "Projects"
+          "id": "vscodeBigtable_views_addedTableList",
+          "name": "My Tables"
+        },
+        {
+          "id": "vscodeBigtable_views_gcpProjectsList",
+          "name": "GCP Projects"
         }
       ]
     }

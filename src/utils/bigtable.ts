@@ -41,12 +41,12 @@ export async function getTables(params: GetTablesParams): Promise<Table[]> {
   return tables;
 }
 
-export type GetTableParam = {
+export type TableInfo = {
   projectId: string;
   instanceId: string;
   tableId: string;
 };
-export async function getTable(params: GetTableParam): Promise<Table> {
+export async function getTable(params: TableInfo): Promise<Table> {
   const bigtable = new Bigtable({ projectId: params.projectId });
   const table = bigtable.instance(params.instanceId).table(params.tableId);
   await table.exists();
