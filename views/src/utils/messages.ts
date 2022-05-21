@@ -21,25 +21,25 @@ class WeviewMessageQueueClient {
       payload: params,
       type: MessageType.REQUEST,
     };
-    const response = this.#createResponseListener<Res>(message);
+    const response = this.createResponseListener<Res>(message);
     vscode.postMessage(message);
     return (await response).payload;
   }
 
-  async #createResponseListener<T>(
+  async createResponseListener<T>(
     message: Pick<Message, "route" | "requestId">
   ): Promise<T> {
     return new Promise<any>((resolve, reject) => {
       // Timeout handler
       const timeoutHandle = setTimeout(() => {
-        WeviewMessageQueueClient.#requestTracker.delete(message.requestId);
+        WeviewMessageQueueClient.requestTracker.delete(message.requestId);
         reject(new Error(`Timeout for ${message.route} ${message.requestId}`));
       }, TIMEOUT);
 
       // Handler which will resolve the response
       const handler = (response: Message<T>) => {
         clearTimeout(timeoutHandle);
-        WeviewMessageQueueClient.#requestTracker.delete(message.requestId);
+        WeviewMessageQueueClient.requestTracker.delete(message.requestId);
         if (response.type === MessageType.ERROR) {
           reject(response);
         } else {
@@ -48,11 +48,11 @@ class WeviewMessageQueueClient {
       };
 
       // Store the handler
-      WeviewMessageQueueClient.#requestTracker.set(message.requestId, handler);
+      WeviewMessageQueueClient.requestTracker.set(message.requestId, handler);
     });
   }
 
-  static #requestTracker = new Map<
+  static requestTracker = new Map<
     Message["requestId"],
     (response: Message) => void
   >();
@@ -63,7 +63,7 @@ class WeviewMessageQueueClient {
       if (![MessageType.RESPONSE, MessageType.ERROR].includes(response?.type)) {
         return;
       }
-      const handler = WeviewMessageQueueClient.#requestTracker.get(
+      const handler = WeviewMessageQueueClient.requestTracker.get(
         response.requestId
       );
       if (!handler) {
@@ -75,7 +75,7 @@ class WeviewMessageQueueClient {
   }
 
   debug() {
-    console.log(WeviewMessageQueueClient.#requestTracker);
+    console.log(WeviewMessageQueueClient.requestTracker);
   }
 }
 

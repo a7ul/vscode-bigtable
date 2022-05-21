@@ -9,47 +9,42 @@ import {
 import { createRouter } from "../routes";
 import { Table } from "../utils/bigtable";
 
-const DEV = true;
+const DEV = false;
 
 export class WebviewEngine {
-  #context: vscode.ExtensionContext;
-  #panels: Record<string, vscode.WebviewPanel> = {};
+  context: vscode.ExtensionContext;
+  panels: Record<string, vscode.WebviewPanel> = {};
 
   constructor(context: vscode.ExtensionContext) {
-    this.#context = context;
+    this.context = context;
   }
 
-  #getWebviewAssetsSrcDir() {
-    return path.join(this.#context.extensionPath, "views", "dist");
-  }
-  async #loadLocalWebviewHtml(view: string) {
+  async loadLocalWebviewHtml() {
     if (DEV) {
-      const response = await fetch("http://localhost:6001/" + view);
+      const response = await fetch("http://localhost:6001/index.html");
       return response.text();
     }
-    const webviewDir = path.join(this.#getWebviewAssetsSrcDir(), view);
-    const htmlDiskPath = vscode.Uri.file(path.join(webviewDir, "index.html"));
+    const htmlDiskPath = vscode.Uri.file(
+      path.join(this.context.extensionPath, "views", "dist", "index.html")
+    );
     return fs.readFile(htmlDiskPath.path, "utf-8");
   }
 
-  #setupMessageQueue(
-    panel: vscode.WebviewPanel,
-    router: BackendMessageHandler
-  ) {
+  setupMessageQueue(panel: vscode.WebviewPanel, router: BackendMessageHandler) {
     const listen = createWebviewMessageQueueBackend(router);
-    listen(this.#context, panel);
+    listen(this.context, panel);
   }
 
-  #getTableId(table: Table): string {
+  getTableId(table: Table): string {
     const id = `table:${table.bigtable.projectId}/${table.instance.id}/${table.id}`;
     return id;
   }
 
   async createTablePanel(table: Table) {
-    const tableId = this.#getTableId(table);
+    const tableId = this.getTableId(table);
 
-    if (this.#panels[tableId]) {
-      return this.#panels[tableId];
+    if (this.panels[tableId]) {
+      return this.panels[tableId];
     }
     const type = "TABLE";
     const panel = vscode.window.createWebviewPanel(
@@ -58,11 +53,13 @@ export class WebviewEngine {
       vscode.ViewColumn.One,
       {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(this.#getWebviewAssetsSrcDir())],
+        localResourceRoots: [
+          vscode.Uri.file(path.resolve(this.context.extensionPath, "views")),
+        ],
       }
     );
     panel.iconPath = vscode.Uri.joinPath(
-      this.#context.extensionUri,
+      this.context.extensionUri,
       "resources",
       "table.svg"
     );
@@ -75,18 +72,18 @@ export class WebviewEngine {
         tableId: table.id,
       },
     };
-    this.#setupMessageQueue(panel, createRouter(context));
-    panel.webview.html = await this.#loadLocalWebviewHtml("query");
+    this.setupMessageQueue(panel, createRouter(context));
+    panel.webview.html = await this.loadLocalWebviewHtml();
 
-    this.#context.subscriptions.push(panel);
-    this.#panels[tableId] = panel;
+    this.context.subscriptions.push(panel);
+    this.panels[tableId] = panel;
 
     panel.onDidDispose(
       () => {
-        delete this.#panels[tableId];
+        delete this.panels[tableId];
       },
       undefined,
-      this.#context.subscriptions
+      this.context.subscriptions
     );
     return panel;
   }
