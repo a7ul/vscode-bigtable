@@ -6,6 +6,8 @@
   "repository": {
     "url": "https://github.com/a7ul/vscode-bigtable.git"
   },
+  "publisher": "a7ul",
+  "icon": "resources/icon.png",
   "license": "MIT",
   "engines": {
     "vscode": "^1.67.0"
