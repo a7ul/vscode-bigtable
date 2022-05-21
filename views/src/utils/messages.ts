@@ -23,7 +23,7 @@ class WeviewMessageQueueClient {
     };
     const response = this.#createResponseListener<Res>(message);
     vscode.postMessage(message);
-    return await response;
+    return (await response).payload;
   }
 
   async #createResponseListener<T>(

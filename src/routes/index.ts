@@ -1,5 +1,5 @@
 import { Message } from "../shared.types";
-import { getRows } from "../utils/bigtable";
+import { getRows, GetRowsParams } from "../utils/bigtable";
 
 /**
  *
@@ -21,10 +21,14 @@ export const createRouter =
         return context;
       }
       case "getRows": {
-        const data = await getRows({
-          ...message.payload,
-        });
-        return data.map((t) => t.id);
+        const { payload } = message as Message<GetRowsParams>;
+        const data = await getRows(payload);
+        return data.map(({ id, data, key, metadata }) => ({
+          id,
+          data,
+          key,
+          metadata,
+        }));
       }
     }
     return null;

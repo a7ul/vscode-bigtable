@@ -53,15 +53,16 @@ export async function getTable(params: GetTableParam): Promise<Table> {
   return table;
 }
 
-type GetRowsParams = {
+export type GetRowsParams = {
   projectId: string;
   instanceId: string;
   tableId: string;
-  options: BigtableGetRowOptions;
+  options?: BigtableGetRowOptions;
 };
 export async function getRows(params: GetRowsParams) {
   const bigtable = new Bigtable({ projectId: params.projectId });
   const table = bigtable.instance(params.instanceId).table(params.tableId);
-  const [rows] = await table.getRows({ limit: 10 });
+  const limit = params.options?.limit ?? 1000;
+  const [rows] = await table.getRows({ ...params?.options, limit });
   return rows;
 }

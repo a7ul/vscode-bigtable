@@ -68,9 +68,12 @@ export class WebviewEngine {
     );
 
     const context = {
-      projectId: table.bigtable.projectId,
-      instanceId: table.instance.id,
-      tableId: table.id,
+      page: "query",
+      table: {
+        projectId: table.bigtable.projectId,
+        instanceId: table.instance.id,
+        tableId: table.id,
+      },
     };
     this.#setupMessageQueue(panel, createRouter(context));
     panel.webview.html = await this.#loadLocalWebviewHtml("query");

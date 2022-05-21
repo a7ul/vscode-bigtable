@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled from "@emotion/styled";
 import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
-import { Spacer } from "../components/spacer";
-import { Padding } from "../styling";
+import { Spacer } from "../../../components/spacer";
+import { Padding } from "../../../styling";
 
 const TextArea = styled.textarea`
   resize: none;
@@ -28,14 +28,22 @@ const ActionContainer = styled.div`
   padding: ${Padding.medium}px 0;
 `;
 
-export function Editor() {
+type Props = {
+  onExecute: (prefix: string) => void;
+};
+export function Editor(props: Props) {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   return (
     <Container>
-      <TextArea autoFocus placeholder="Enter rowKey" />
+      <TextArea ref={textAreaRef} autoFocus placeholder="Enter rowKey" />
       <ActionContainer>
         <VSCodeButton>Cancel</VSCodeButton>
         <Spacer width={8} />
-        <VSCodeButton>Execute</VSCodeButton>
+        <VSCodeButton
+          onClick={() => props.onExecute(textAreaRef.current?.value ?? "")}
+        >
+          Execute
+        </VSCodeButton>
       </ActionContainer>
     </Container>
   );
