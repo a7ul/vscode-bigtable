@@ -1,5 +1,6 @@
-import React, { useRef } from "react";
+import React from "react";
 import styled from "@emotion/styled";
+import { QueryType } from "../types";
 
 const TextArea = styled.textarea`
   resize: none;
@@ -17,14 +18,16 @@ const Container = styled.section`
 `;
 
 type Props = {
-  loading?: boolean;
+  type: QueryType;
+  text: string;
+  onTextChange: (text: string) => void;
 };
 export function Editor(props: Props) {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   return (
     <Container>
       <TextArea
-        ref={textAreaRef}
+        value={props.text}
+        onChange={(e) => props.onTextChange(e.target.value)}
         autoFocus={false}
         placeholder="Enter prefix"
       />

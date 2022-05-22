@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { GetRowOptions } from "@google-cloud/bigtable";
 import {
   VSCodeButton,
   VSCodeDropdown,
@@ -8,6 +7,7 @@ import {
 } from "@vscode/webview-ui-toolkit/react";
 import React from "react";
 import { Spacer } from "../../../components/spacer";
+import { QueryType } from "../types";
 
 const ActionContainer = styled.div`
   display: flex;
@@ -21,11 +21,6 @@ const Progress = styled(VSCodeProgressRing)`
   margin-left: 5px;
 `;
 
-enum QueryType {
-  prefix = "prefix",
-  range = "range",
-  rowKeys = "rowKeys",
-}
 type Props = {
   onExecute: () => void;
   loading?: boolean;
@@ -39,15 +34,11 @@ export function ActionsBar(props: Props) {
       </VSCodeButton>
       <Spacer width={5} />
       <VSCodeDropdown>
-        <VSCodeOption onClick={() => props.setQueryType(QueryType.prefix)}>
-          Prefix
-        </VSCodeOption>
-        <VSCodeOption onClick={() => props.setQueryType(QueryType.rowKeys)}>
-          RowKeys
-        </VSCodeOption>
-        <VSCodeOption onClick={() => props.setQueryType(QueryType.range)}>
-          Range
-        </VSCodeOption>
+        {Object.values(QueryType).map((type) => (
+          <VSCodeOption key={type} onClick={() => props.setQueryType(type)}>
+            {type}
+          </VSCodeOption>
+        ))}
       </VSCodeDropdown>
       {props.loading ? <Progress /> : null}
     </ActionContainer>

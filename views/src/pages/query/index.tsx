@@ -8,6 +8,7 @@ import { QueryPageContextValue } from "../../hooks/useInitPage";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { ActionsBar } from "./sections/actions";
 import { GetRowsOptions } from "@google-cloud/bigtable";
+import { QueryType } from "./types";
 
 const RootContainer = styled.main`
   padding: 0;
@@ -25,26 +26,44 @@ const BottomPaneContainer = styled.section`
 type Props = {
   context: QueryPageContextValue;
 };
+
+function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
+  const defaults: GetRowsOptions = { limit: 200 };
+  switch (type) {
+    case QueryType.prefix: {
+      return {
+        ...defaults,
+        prefix: rawQuery,
+      };
+    }
+  }
+}
+
 export function QueryPage(props: Props) {
   const { getRows, rows, loading, error } = useTableQuery(props.context.table);
-  const [rowOptions, setRowOptions] = React.useState<GetRowsOptions>({
-    limit: 200,
-  });
+  const [rawQuery, setRawQuery] = React.useState<string>("");
+  const [queryType, setQueryType] = React.useState(QueryType.prefix);
+
   useEffect(() => {
-    getRows(rowOptions);
+    getRows(createRowOptions(queryType, rawQuery));
   }, []);
+
   return (
     <RootContainer>
       <SplitPane.Container>
         <SplitPane.Pane>
-          <Editor />
+          <Editor
+            type={queryType}
+            text={rawQuery}
+            onTextChange={(text) => setRawQuery(text)}
+          />
         </SplitPane.Pane>
         <SplitPane.Pane>
           <BottomPaneContainer>
             <ActionsBar
               loading={loading}
-              onExecute={() => getRows({})}
-              setQueryType={(type) => {}}
+              onExecute={() => getRows(createRowOptions(queryType, rawQuery))}
+              setQueryType={(type) => setQueryType(type)}
             />
             <Results rows={rows} loading={loading} error={error} />
           </BottomPaneContainer>
