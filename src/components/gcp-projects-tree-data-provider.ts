@@ -104,7 +104,7 @@ export class TableTreeItem extends BigtableTreeItem {
     this.tooltip = this.table.name ?? undefined;
     this.command = {
       title: "Add Bigtable Table",
-      command: "vscodeBigtable_command_addTable",
+      command: "vscodeBigtable_command_addStoredTable",
       arguments: [
         this.table.name, // id
         this.table.bigtable.projectId, // projectId

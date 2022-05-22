@@ -17,9 +17,10 @@
   ],
   "activationEvents": [
     "onView:vscodeBigtable_views_gcpProjectsList",
-    "onView:vscodeBigtable_views_addedTableList",
-    "onCommand:vscodeBigtable_command_addTable",
-    "onCommand:vscodeBigtable_command_openTable"
+    "onView:vscodeBigtable_views_storedTableList",
+    "onCommand:vscodeBigtable_command_addStoredTable",
+    "onCommand:vscodeBigtable_command_openTable",
+    "onCommand:vscodeBigtable_command_deleteStoredTable"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -29,9 +30,13 @@
         "title": "Open Bigtable"
       },
       {
-        "command": "vscodeBigtable_command_addTable",
+        "command": "vscodeBigtable_command_addStoredTable",
         "title": "Add Bigtable",
-        "enablement": "false"
+        "icon": "$(settings-add)"
+      },
+      {
+        "command": "vscodeBigtable_command_deleteStoredTable",
+        "title": "Remove from list"
       }
     ],
     "viewsContainers": {
@@ -46,12 +51,27 @@
     "views": {
       "vscodeBigtable_viewContainers_activitybar": [
         {
-          "id": "vscodeBigtable_views_addedTableList",
-          "name": "My Tables"
+          "id": "vscodeBigtable_views_storedTableList",
+          "name": "Saved Tables"
         },
         {
           "id": "vscodeBigtable_views_gcpProjectsList",
           "name": "GCP Projects"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "vscodeBigtable_command_deleteStoredTable",
+          "when": "view == vscodeBigtable_views_storedTableList && viewItem == table"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "vscodeBigtable_command_addStoredTable",
+          "when": "view == vscodeBigtable_views_storedTableList",
+          "group": "navigation"
         }
       ]
     }

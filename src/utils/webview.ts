@@ -96,6 +96,7 @@ export class WebviewEngine {
         ],
       }
     );
+
     panel.iconPath = vscode.Uri.joinPath(
       this.context.extensionUri,
       "resources",

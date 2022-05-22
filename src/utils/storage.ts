@@ -35,3 +35,15 @@ export async function addStoredTable(
   store.set(tableInfo.id, tableInfo);
   context.globalState.update("tableList", Array.from(store.values()));
 }
+
+export async function deleteStoredTable(
+  context: ExtensionContext,
+  id: string
+): Promise<void> {
+  const tableList = getStoredTableList(context);
+  const store = new Map<string, StoredTableInfo>(
+    tableList.map((t) => [t.id, t])
+  );
+  store.delete(id);
+  context.globalState.update("tableList", Array.from(store.values()));
+}

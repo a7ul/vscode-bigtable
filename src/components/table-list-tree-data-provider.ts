@@ -42,6 +42,7 @@ class TableTreeItem extends vscode.TreeItem {
     super(tableInfo.displayName, vscode.TreeItemCollapsibleState.None);
     this.tableInfo = tableInfo;
     this.context = context;
+    this.contextValue = "table";
 
     this.id = this.tableInfo.id;
     this.iconPath = vscode.Uri.joinPath(this.resourceUri, "table.svg");

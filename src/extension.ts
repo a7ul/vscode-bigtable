@@ -4,6 +4,7 @@ import { StoredTableListTreeDataProvider } from "./components/table-list-tree-da
 
 import {
   addStoredTable,
+  deleteStoredTable,
   getStoredTable,
   StoredTableInfo,
 } from "./utils/storage";
@@ -20,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     gcpProjectsProvider
   );
   const tablesListTreeview = vscode.window.registerTreeDataProvider(
-    "vscodeBigtable_views_addedTableList",
+    "vscodeBigtable_views_storedTableList",
     storedTablesProvider
   );
 
@@ -50,8 +51,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const addTableCommand = vscode.commands.registerCommand(
-    "vscodeBigtable_command_addTable",
+  const addStoredTableCommand = vscode.commands.registerCommand(
+    "vscodeBigtable_command_addStoredTable",
     async (...args) => {
       try {
         const id = args[0];
@@ -88,10 +89,31 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const deleteStoredTableCommand = vscode.commands.registerCommand(
+    "vscodeBigtable_command_deleteStoredTable",
+    async ({ id }: { id: string }) => {
+      try {
+        if (!id) {
+          await webviewEngine.createConfigurePanel();
+          return;
+        }
+
+        deleteStoredTable(context, id);
+        storedTablesProvider.refresh();
+      } catch (err: any) {
+        vscode.window.showErrorMessage(
+          `Error: Unable to delete bigtable. ${err.message}`,
+          "Dismiss"
+        );
+      }
+    }
+  );
+
   context.subscriptions.push(
     gcpProjectsListTreeview,
     tablesListTreeview,
-    addTableCommand,
+    addStoredTableCommand,
+    deleteStoredTableCommand,
     openTableCommand
   );
 }
