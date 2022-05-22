@@ -9,7 +9,7 @@ import {
 import { createRouter } from "../routes";
 import { StoredTableInfo } from "./storage";
 
-const DEV = true;
+const DEV = false;
 
 export class WebviewEngine {
   context: vscode.ExtensionContext;
