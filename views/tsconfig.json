@@ -8,6 +8,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "skipLibCheck": true
   }
 }

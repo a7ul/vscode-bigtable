@@ -4,7 +4,7 @@ import React from "react";
 import { QueryPageContextValue } from "../../hooks/useInitPage";
 import { useTableQuery } from "../../hooks/useTableQuery";
 
-import { Editable } from "./sections/Editable";
+import { Editable } from "./sections/editable";
 
 const RootContainer = styled.main`
   display: flex;
