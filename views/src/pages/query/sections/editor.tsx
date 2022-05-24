@@ -29,7 +29,7 @@ export function Editor(props: Props) {
         value={props.text}
         onChange={(e) => props.onTextChange(e.target.value)}
         autoFocus={false}
-        placeholder="Enter prefix"
+        placeholder="Enter list of prefixes that row keys must match"
       />
     </Container>
   );

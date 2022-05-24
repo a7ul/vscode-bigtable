@@ -5,21 +5,31 @@ import { QueryType } from "../types";
 import { ActionsBar } from "./actions";
 import { Editor } from "./editor";
 
-function cleanupRowKey(rawKey: string) {
-  let key = rawKey.trim();
-  if (key.startsWith('"') && key.endsWith('"')) {
-    return key.slice(1, -1);
-  }
-  return key;
+function parseRowKeyPrefixes(raw: string) {
+  let text = raw.trim();
+  const lines = text.split("\n");
+  return lines.map((line) => {
+    const key = line.trim();
+    if (key.startsWith('"') && key.endsWith('"')) {
+      return key.slice(1, -1);
+    }
+    return key;
+  });
 }
 
 function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
   const defaults: GetRowsOptions = { limit: 200 };
   switch (type) {
-    case QueryType.prefix: {
+    case QueryType.prefixes: {
       return {
         ...defaults,
-        prefix: cleanupRowKey(rawQuery),
+        prefixes: parseRowKeyPrefixes(rawQuery),
+      };
+    }
+    case QueryType.rowKeys: {
+      return {
+        ...defaults,
+        keys: parseRowKeyPrefixes(rawQuery),
       };
     }
   }
@@ -44,7 +54,7 @@ type Props = {
 
 export function Editable(props: Props) {
   const [rawQuery, setRawQuery] = React.useState<string>("");
-  const [queryType, setQueryType] = React.useState(QueryType.prefix);
+  const [queryType, setQueryType] = React.useState(QueryType.prefixes);
 
   useEffect(() => {
     props.onExecute({ limit: 300 });

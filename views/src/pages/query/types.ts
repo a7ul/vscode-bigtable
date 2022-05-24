@@ -1,5 +1,5 @@
 export enum QueryType {
-  prefix = "prefix",
+  prefixes = "prefixes",
   // range = "range",
-  // rowKeys = "rowKeys",
+  rowKeys = "rowKeys",
 }
