@@ -55,6 +55,13 @@ function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
         ranges: parseRowKeyRanges(rawQuery),
       };
     }
+    case QueryType.advanced: {
+      const options = JSON.parse(rawQuery);
+      return {
+        ...defaults,
+        ...options,
+      };
+    }
   }
 }
 

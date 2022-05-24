@@ -14,6 +14,9 @@ function createPlaceHolder(type: QueryType): string {
       return `Enter one row key range per line.
 Format: start_row_key,end_row_key`;
     }
+    case QueryType.advanced: {
+      return `Enter the query in JSON format (GetRowsOptions)`;
+    }
   }
 }
 
@@ -30,6 +33,13 @@ const Container = styled.section`
   display: flex;
   flex: 1;
   flex-direction: column;
+  position: relative;
+`;
+
+const Link = styled.a`
+  position: absolute;
+  top: 5px;
+  right: 5px;
 `;
 
 type Props = {
@@ -39,13 +49,20 @@ type Props = {
 };
 export function Editor(props: Props) {
   return (
-    <Container>
-      <TextArea
-        value={props.text}
-        onChange={(e) => props.onTextChange(e.target.value)}
-        autoFocus={false}
-        placeholder={createPlaceHolder(props.queryType)}
-      />
-    </Container>
+    <>
+      <Container>
+        <TextArea
+          value={props.text}
+          onChange={(e) => props.onTextChange(e.target.value)}
+          autoFocus={false}
+          placeholder={createPlaceHolder(props.queryType)}
+        />
+        {props.queryType === QueryType.advanced ? (
+          <Link href="https://github.com/googleapis/nodejs-bigtable/blob/033bfc878c2aeb40cc40ca66f905e47810f42c12/src/table.ts#L195">
+            format?
+          </Link>
+        ) : null}
+      </Container>
+    </>
   );
 }

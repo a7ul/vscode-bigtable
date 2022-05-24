@@ -13,7 +13,7 @@ const ActionContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 2px 0 7px 0;
+  padding: 5px 0 1px 0;
 `;
 
 const Progress = styled(VSCodeProgressRing)`
