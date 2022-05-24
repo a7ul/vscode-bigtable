@@ -8,12 +8,6 @@ jobs:
   deploy-extension:
     runs-on: ubuntu-latest
     steps:
-      - run: yarn
-      - run: yarn build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:

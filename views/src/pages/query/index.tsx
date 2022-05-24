@@ -1,5 +1,3 @@
-import { Editor } from "./sections/editor";
-
 import { Results } from "./sections/result";
 import styled from "@emotion/styled";
 import React from "react";
