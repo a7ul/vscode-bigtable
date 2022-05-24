@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "@emotion/styled";
 import { QueryType } from "../types";
+
+function createPlaceHolder(type: QueryType) {
+  switch (type) {
+    case QueryType.prefixes: {
+      return "Enter prefixes that row keys must match, one per line";
+    }
+    case QueryType.rowKeys: {
+      return "Enter row keys, one per line";
+    }
+  }
+}
 
 const TextArea = styled.textarea`
   resize: none;
@@ -18,7 +29,7 @@ const Container = styled.section`
 `;
 
 type Props = {
-  type: QueryType;
+  queryType: QueryType;
   text: string;
   onTextChange: (text: string) => void;
 };
@@ -29,7 +40,7 @@ export function Editor(props: Props) {
         value={props.text}
         onChange={(e) => props.onTextChange(e.target.value)}
         autoFocus={false}
-        placeholder="Enter list of prefixes that row keys must match"
+        placeholder={createPlaceHolder(props.queryType)}
       />
     </Container>
   );

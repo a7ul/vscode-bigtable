@@ -53,8 +53,8 @@ type Props = {
 };
 
 export function Editable(props: Props) {
-  const [rawQuery, setRawQuery] = React.useState<string>("");
   const [queryType, setQueryType] = React.useState(QueryType.prefixes);
+  const [rawQuery, setRawQuery] = React.useState<string>("");
 
   useEffect(() => {
     props.onExecute({ limit: 300 });
@@ -64,8 +64,8 @@ export function Editable(props: Props) {
     <>
       <TopPane>
         <Editor
-          type={queryType}
           text={rawQuery}
+          queryType={queryType}
           onTextChange={(text) => setRawQuery(text)}
         />
       </TopPane>
