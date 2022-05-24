@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { GetRowsOptions } from "@google-cloud/bigtable";
 import React, { useEffect } from "react";
+import { client } from "../../../utils/messages";
 import { QueryType } from "../types";
 import { ActionsBar } from "./actions";
 import { Editor } from "./editor";
@@ -34,8 +35,12 @@ function parseRowKeyRanges(raw: string) {
   });
 }
 
-function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
-  const defaults: GetRowsOptions = { limit: 200 };
+function createRowOptions(
+  type: QueryType,
+  rawQuery: string,
+  limit: number
+): GetRowsOptions {
+  const defaults: GetRowsOptions = { limit };
   switch (type) {
     case QueryType.prefixes: {
       return {
@@ -56,11 +61,19 @@ function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
       };
     }
     case QueryType.advanced: {
-      const options = JSON.parse(rawQuery);
-      return {
-        ...defaults,
-        ...options,
-      };
+      try {
+        const options = JSON.parse(rawQuery);
+        return {
+          ...defaults,
+          ...options,
+        };
+      } catch (err: any) {
+        client.request("showError", {
+          message: `Error parsing: ${err?.message}`,
+        });
+        console.error(err);
+        return defaults;
+      }
     }
   }
 }
@@ -85,9 +98,10 @@ type Props = {
 export function Editable(props: Props) {
   const [queryType, setQueryType] = React.useState(QueryType.prefixes);
   const [rawQuery, setRawQuery] = React.useState<string>("");
+  const [limit, setLimit] = React.useState<number>(300);
 
   useEffect(() => {
-    props.onExecute({ limit: 300 });
+    props.onExecute({ limit });
   }, []);
 
   return (
@@ -101,9 +115,11 @@ export function Editable(props: Props) {
       </TopPane>
       <CenterPane>
         <ActionsBar
+          limit={limit}
+          setLimit={(limit) => setLimit(limit)}
           loading={props.loading}
           onExecute={() =>
-            props.onExecute(createRowOptions(queryType, rawQuery))
+            props.onExecute(createRowOptions(queryType, rawQuery, limit))
           }
           setQueryType={(type) => setQueryType(type)}
         />

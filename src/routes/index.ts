@@ -1,5 +1,6 @@
 import { Message } from "../shared.types";
 import { getRows, GetRowsParams } from "../utils/bigtable";
+import * as vscode from "vscode";
 
 /**
  *
@@ -29,6 +30,11 @@ export const createRouter =
           key,
           metadata,
         }));
+      }
+      case "showError": {
+        const { payload } = message as Message<{ message: string }>;
+        vscode.window.showErrorMessage(payload.message);
+        return {};
       }
     }
     return null;

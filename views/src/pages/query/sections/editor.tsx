@@ -59,7 +59,7 @@ export function Editor(props: Props) {
         />
         {props.queryType === QueryType.advanced ? (
           <Link href="https://github.com/googleapis/nodejs-bigtable/blob/033bfc878c2aeb40cc40ca66f905e47810f42c12/src/table.ts#L195">
-            format?
+            spec?
           </Link>
         ) : null}
       </Container>
