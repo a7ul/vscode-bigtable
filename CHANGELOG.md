@@ -15,3 +15,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Improved UI
 - Add support for saving selected table configs
 - Adds loaders, prefix based query and error handling
+
+# v1.1.0
+
+- Adds support for querying by row keys, ranges and prefixes
+- Adds support for advanced query using a json syntax
