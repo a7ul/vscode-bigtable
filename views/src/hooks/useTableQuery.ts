@@ -26,6 +26,7 @@ export function useTableQuery(params?: TableParams | null) {
         setRows(results);
       }
     } catch (err: any) {
+      console.error(err);
       setError(err);
     } finally {
       setLoading(false);

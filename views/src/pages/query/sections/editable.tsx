@@ -5,15 +5,32 @@ import { QueryType } from "../types";
 import { ActionsBar } from "./actions";
 import { Editor } from "./editor";
 
+function cleanupRowKey(rowKey: string) {
+  const key = rowKey.trim();
+  if (key.startsWith('"') && key.endsWith('"')) {
+    return key.slice(1, -1);
+  }
+  return key;
+}
+
 function parseRowKeyPrefixes(raw: string) {
   let text = raw.trim();
   const lines = text.split("\n");
   return lines.map((line) => {
-    const key = line.trim();
-    if (key.startsWith('"') && key.endsWith('"')) {
-      return key.slice(1, -1);
-    }
-    return key;
+    return cleanupRowKey(line);
+  });
+}
+
+function parseRowKeyRanges(raw: string) {
+  let text = raw.trim();
+  const lines = text.split("\n");
+  return lines.map((rawLine) => {
+    const line = rawLine.trim();
+    const [start, end] = line.split(",");
+    return {
+      ...(start && { start: cleanupRowKey(start) }),
+      ...(end && { end: cleanupRowKey(end) }),
+    };
   });
 }
 
@@ -30,6 +47,12 @@ function createRowOptions(type: QueryType, rawQuery: string): GetRowsOptions {
       return {
         ...defaults,
         keys: parseRowKeyPrefixes(rawQuery),
+      };
+    }
+    case QueryType.keyRanges: {
+      return {
+        ...defaults,
+        ranges: parseRowKeyRanges(rawQuery),
       };
     }
   }

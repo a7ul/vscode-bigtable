@@ -1,14 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import styled from "@emotion/styled";
 import { QueryType } from "../types";
 
-function createPlaceHolder(type: QueryType) {
+function createPlaceHolder(type: QueryType): string {
   switch (type) {
     case QueryType.prefixes: {
       return "Enter prefixes that row keys must match, one per line";
     }
     case QueryType.rowKeys: {
       return "Enter row keys, one per line";
+    }
+    case QueryType.keyRanges: {
+      return `Enter one row key range per line.
+Format: start_row_key,end_row_key`;
     }
   }
 }
