@@ -9,8 +9,6 @@ import {
 import { createRouter } from "../routes";
 import { StoredTableInfo } from "./storage";
 
-const DEV = false;
-
 export class WebviewEngine {
   context: vscode.ExtensionContext;
   panels: Record<string, vscode.WebviewPanel> = {};
@@ -20,11 +18,13 @@ export class WebviewEngine {
   }
 
   async loadLocalWebviewHtml() {
-    if (DEV) {
+    if (this.context.extensionMode === vscode.ExtensionMode.Development) {
+      // Running in development mode
       const response = await fetch("http://localhost:6001/index.html");
       const html = await response.text();
       return html;
     }
+    // Running in test || production mode
     const htmlDiskPath = vscode.Uri.file(
       path.join(this.context.extensionPath, "resources", "index.html")
     );

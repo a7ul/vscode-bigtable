@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { client } from "../utils/messages";
+import type { TableParams } from "./useTableQuery";
 
 export type PageContextValue =
   | QueryPageContextValue
@@ -7,11 +8,7 @@ export type PageContextValue =
 
 export type QueryPageContextValue = {
   page: "query";
-  table: {
-    projectId: string;
-    instanceId: string;
-    tableId: string;
-  };
+  table: TableParams;
 };
 export type ConfigurePageContextValue = {
   page: "configure";

@@ -8,6 +8,7 @@ import {
   Project,
   Table,
 } from "../utils/bigtable";
+import type { StoredTableInfo } from "../utils/storage";
 
 export class GCPBigtableTreeDataProvider
   implements vscode.TreeDataProvider<BigtableTreeItem>
@@ -83,7 +84,7 @@ class InstanceTreeItem extends BigtableTreeItem {
   async getChildren(): Promise<BigtableTreeItem[]> {
     const tables = await getTables({
       instanceId: this.instance.id,
-      projectId: this.instance.bigtable.projectId,
+      clientOptions: { projectId: this.instance.bigtable.projectId },
     });
     return tables.map((t) => new TableTreeItem(this.context, t));
   }
@@ -102,16 +103,17 @@ export class TableTreeItem extends BigtableTreeItem {
     this.iconPath = vscode.Uri.joinPath(this.resourceUri, "table.svg");
     this.description = this.table.name ?? false;
     this.tooltip = this.table.name ?? undefined;
+    const config: StoredTableInfo = {
+      id: this.table.name,
+      instanceId: this.table.instance.id,
+      tableId: this.table.id,
+      displayName: this.table.id,
+      clientOptions: { projectId: this.table.bigtable.projectId },
+    };
     this.command = {
       title: "Add Bigtable Table",
       command: "vscodeBigtable_command_addStoredTable",
-      arguments: [
-        this.table.name, // id
-        this.table.bigtable.projectId, // projectId
-        this.table.instance.id, // instanceId
-        this.table.id, // tableId
-        this.table.id, // displayName
-      ],
+      arguments: [JSON.stringify(config)],
     };
   }
 

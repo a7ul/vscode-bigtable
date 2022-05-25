@@ -53,32 +53,25 @@ export function activate(context: vscode.ExtensionContext) {
 
   const addStoredTableCommand = vscode.commands.registerCommand(
     "vscodeBigtable_command_addStoredTable",
-    async (...args) => {
+    async (rawConfig: string) => {
       try {
-        const id = args[0];
-        const projectId = args[1];
-        const instanceId = args[2];
-        const tableId = args[3];
-        const displayName = args[4];
+        const tableInfo = JSON.parse(rawConfig) as StoredTableInfo;
 
-        if (!id || !projectId || !instanceId || !tableId) {
+        if (
+          !tableInfo.id ||
+          !tableInfo.clientOptions.projectId ||
+          !tableInfo.instanceId ||
+          !tableInfo.tableId
+        ) {
           await webviewEngine.createConfigurePanel();
           return;
         }
-
-        const tableInfo: StoredTableInfo = {
-          id,
-          projectId,
-          instanceId,
-          tableId,
-          displayName: displayName || tableId,
-        };
 
         addStoredTable(context, tableInfo);
         storedTablesProvider.refresh();
         await vscode.commands.executeCommand(
           "vscodeBigtable_command_openTable",
-          id
+          tableInfo.id
         );
       } catch (err: any) {
         vscode.window.showErrorMessage(

@@ -1,9 +1,13 @@
-import type { GetRowsOptions, Row } from "@google-cloud/bigtable";
+import type {
+  BigtableOptions,
+  GetRowsOptions,
+  Row,
+} from "@google-cloud/bigtable";
 import { useState } from "react";
 import { client } from "../utils/messages";
 
-type TableParams = {
-  projectId: string;
+export type TableParams = {
+  clientOptions: BigtableOptions;
   instanceId: string;
   tableId: string;
 };

@@ -1,6 +1,8 @@
 import { ExtensionContext } from "vscode";
 import { TableInfo } from "./bigtable";
 
+const TABLE_LIST_KEY = "savedTables";
+
 export type StoredTableInfo = TableInfo & {
   id: string;
   displayName: string;
@@ -12,7 +14,7 @@ export function getStoredTableList(
   context: ExtensionContext
 ): StoredTableInfo[] {
   const tableList =
-    context.globalState.get<StoredTableInfo[]>("tableList") ?? [];
+    context.globalState.get<StoredTableInfo[]>(TABLE_LIST_KEY) ?? [];
   return tableList;
 }
 
@@ -33,7 +35,7 @@ export async function addStoredTable(
     tableList.map((t) => [t.id, t])
   );
   store.set(tableInfo.id, tableInfo);
-  context.globalState.update("tableList", Array.from(store.values()));
+  context.globalState.update(TABLE_LIST_KEY, Array.from(store.values()));
 }
 
 export async function deleteStoredTable(
@@ -45,5 +47,5 @@ export async function deleteStoredTable(
     tableList.map((t) => [t.id, t])
   );
   store.delete(id);
-  context.globalState.update("tableList", Array.from(store.values()));
+  context.globalState.update(TABLE_LIST_KEY, Array.from(store.values()));
 }
