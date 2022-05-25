@@ -5,9 +5,9 @@ import fetch from "cross-fetch";
 import {
   BackendMessageHandler,
   createWebviewMessageQueueBackend,
-  createRouter,
 } from "./messages";
 import { StoredTableInfo } from "./storage";
+import { createRouter } from "./messages/routes";
 
 export class WebviewEngine {
   context: vscode.ExtensionContext;
@@ -78,7 +78,7 @@ export class WebviewEngine {
     return panel;
   }
 
-  async createConfigurePanel() {
+  async createConfigurePanel(storedTableId: string | undefined) {
     const panelId = "configure:view";
 
     if (this.panels[panelId]) {
@@ -103,7 +103,7 @@ export class WebviewEngine {
       "setting.svg"
     );
 
-    const context = { page: "configure" };
+    const context = { page: "configure", storedTableId };
     this.setupMessageQueue(panel, createRouter(context));
     panel.webview.html = await this.loadLocalWebviewHtml();
 

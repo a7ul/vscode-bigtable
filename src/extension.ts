@@ -29,11 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
     "vscodeBigtable_command_openTable",
     async (storedTableId) => {
       try {
-        if (!storedTableId) {
-          await webviewEngine.createConfigurePanel();
-          return;
-        }
-
         const tableInfo = getStoredTable(context, storedTableId);
         if (!tableInfo) {
           vscode.window.showErrorMessage(
@@ -45,6 +40,20 @@ export function activate(context: vscode.ExtensionContext) {
       } catch (err: any) {
         vscode.window.showErrorMessage(
           `Error: Unable to open bigtable view. ${err.message}`,
+          "Dismiss"
+        );
+      }
+    }
+  );
+
+  const openConfigureCommand = vscode.commands.registerCommand(
+    "vscodeBigtable_command_openConfigureTable",
+    async (storedTableId: string | undefined) => {
+      try {
+        await webviewEngine.createConfigurePanel(storedTableId);
+      } catch (err: any) {
+        vscode.window.showErrorMessage(
+          `Error: Unable to open configure view. ${err.message}`,
           "Dismiss"
         );
       }
@@ -85,11 +94,6 @@ export function activate(context: vscode.ExtensionContext) {
     "vscodeBigtable_command_deleteStoredTable",
     async ({ id }: { id: string }) => {
       try {
-        if (!id) {
-          await webviewEngine.createConfigurePanel();
-          return;
-        }
-
         deleteStoredTable(context, id);
         storedTablesProvider.refresh();
       } catch (err: any) {

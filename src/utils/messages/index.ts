@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { WebviewPanel } from "vscode";
 import { Message, MessageType } from "../../shared.types";
-export { createRouter } from "./routes";
 
 export type BackendMessageHandler = (
   message: Message

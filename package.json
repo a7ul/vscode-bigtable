@@ -19,6 +19,7 @@
     "onView:vscodeBigtable_views_gcpProjectsList",
     "onView:vscodeBigtable_views_storedTableList",
     "onCommand:vscodeBigtable_command_addStoredTable",
+    "onCommand:vscodeBigtable_command_openConfigureTable",
     "onCommand:vscodeBigtable_command_openTable",
     "onCommand:vscodeBigtable_command_deleteStoredTable"
   ],
@@ -30,9 +31,13 @@
         "title": "Open Bigtable"
       },
       {
-        "command": "vscodeBigtable_command_addStoredTable",
-        "title": "Add Bigtable",
+        "command": "vscodeBigtable_command_openConfigureTable",
+        "title": "Configure Bigtable",
         "icon": "$(settings-add)"
+      },
+      {
+        "command": "vscodeBigtable_command_addStoredTable",
+        "title": "Add Bigtable"
       },
       {
         "command": "vscodeBigtable_command_deleteStoredTable",
@@ -69,7 +74,7 @@
       ],
       "view/title": [
         {
-          "command": "vscodeBigtable_command_addStoredTable",
+          "command": "vscodeBigtable_command_openConfigureTable",
           "when": "view == vscodeBigtable_views_storedTableList",
           "group": "navigation"
         }
