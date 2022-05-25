@@ -1,5 +1,5 @@
-import { Message } from "../shared.types";
-import { getRows, GetRowsParams } from "../utils/bigtable";
+import { Message } from "../../shared.types";
+import { getRows, GetRowsParams } from "../bigtable";
 import * as vscode from "vscode";
 
 /**

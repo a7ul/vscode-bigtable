@@ -5,8 +5,8 @@ import fetch from "cross-fetch";
 import {
   BackendMessageHandler,
   createWebviewMessageQueueBackend,
+  createRouter,
 } from "./messages";
-import { createRouter } from "../routes";
 import { StoredTableInfo } from "./storage";
 
 export class WebviewEngine {
