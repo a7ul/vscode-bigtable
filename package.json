@@ -66,6 +66,20 @@
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "vscodeBigtable_command_openTable",
+          "when": "false"
+        },
+        {
+          "command": "vscodeBigtable_command_addStoredTable",
+          "when": "false"
+        },
+        {
+          "command": "vscodeBigtable_command_deleteStoredTable",
+          "when": "false"
+        }
+      ],
       "view/item/context": [
         {
           "command": "vscodeBigtable_command_deleteStoredTable",
