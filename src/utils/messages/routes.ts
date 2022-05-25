@@ -1,6 +1,7 @@
 import { Message } from "../../shared.types";
 import { getRows, GetRowsParams } from "../bigtable";
 import * as vscode from "vscode";
+import type { StoredTableInfo } from "../storage";
 
 /**
  *
@@ -12,14 +13,21 @@ import * as vscode from "vscode";
  * @returns payload of the response message
  */
 export const createRouter =
-  <T extends Record<string, any>>(context: T) =>
+  <T extends Record<string, any>>(pageContext: T) =>
   async (message: Message) => {
     switch (message.route) {
       case "ping": {
         return { pong: true };
       }
       case "context": {
-        return context;
+        return pageContext;
+      }
+      case "createSavedTable": {
+        const tableInfo = message.payload as StoredTableInfo;
+        await vscode.commands.executeCommand(
+          "vscodeBigtable_command_addStoredTable",
+          JSON.stringify(tableInfo)
+        );
       }
       case "getRows": {
         const { payload } = message as Message<GetRowsParams>;

@@ -63,8 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
           !tableInfo.instanceId ||
           !tableInfo.tableId
         ) {
-          await webviewEngine.createConfigurePanel();
-          return;
+          throw new Error(`Invalid table config: ${rawConfig}`);
         }
 
         addStoredTable(context, tableInfo);
