@@ -20,3 +20,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Adds support for querying by row keys, ranges and prefixes
 - Adds support for advanced query using a json syntax
+
+# v1.2.0
+
+- Adds support for connecting to local bigtable emulators
+- Manually connect to bigtable instances

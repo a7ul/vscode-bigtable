@@ -6,12 +6,14 @@ VSCode extension to query and manage Google Bigtable instances.
 
 ## Features
 
-**Query bigtable instances**
+- Query bigtable instances
 
-- by rowkeys
-- by ranges
-- by prefixes
-- Advanced query using a json syntax
+  - by rowkeys
+  - by ranges
+  - by prefixes
+  - Advanced query using a json syntax
+
+- Supports connecting to local bigtable emulators
 
 ## Screenshots
 
@@ -31,5 +33,3 @@ The extension consists of two parts:
 - `make dev` - this will start the frontend server for the webview
 - Change the `DEV` variable to true in `src/utils/webview.ts`
 - Then open up this repo in vscode and click on Debug > Run Extension
-
----
