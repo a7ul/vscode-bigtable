@@ -2,7 +2,7 @@
   "name": "vscode-bigtable",
   "displayName": "vscode-bigtable",
   "description": "A VSCode extension for Google Bigtable",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "url": "https://github.com/a7ul/vscode-bigtable.git"
   },
