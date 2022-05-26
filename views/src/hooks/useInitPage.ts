@@ -12,6 +12,7 @@ export type QueryPageContextValue = {
 };
 export type ConfigurePageContextValue = {
   page: "configure";
+  storedTableId?: string;
 };
 
 export const PageContext = React.createContext<PageContextValue | null>(null);

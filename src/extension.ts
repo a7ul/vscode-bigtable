@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { GCPBigtableTreeDataProvider } from "./components/gcp-projects-tree-data-provider";
 import { StoredTableListTreeDataProvider } from "./components/table-list-tree-data-provider";
+import { getTable } from "./utils/bigtable";
 
 import {
   addStoredTable,
@@ -48,9 +49,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   const openConfigureCommand = vscode.commands.registerCommand(
     "vscodeBigtable_command_openConfigureTable",
-    async (storedTableId: string | undefined) => {
+    async (item: { id: string } | undefined) => {
       try {
-        await webviewEngine.createConfigurePanel(storedTableId);
+        await webviewEngine.createConfigurePanel(item?.id);
       } catch (err: any) {
         vscode.window.showErrorMessage(
           `Error: Unable to open configure view. ${err.message}`,
@@ -75,12 +76,24 @@ export function activate(context: vscode.ExtensionContext) {
           throw new Error(`Invalid table config: ${rawConfig}`);
         }
 
+        const [exists] = await (await getTable(tableInfo)).exists();
+        if (!exists) {
+          throw new Error(
+            `Table with ${JSON.stringify(
+              tableInfo,
+              undefined,
+              2
+            )} does not exist`
+          );
+        }
+
         addStoredTable(context, tableInfo);
         storedTablesProvider.refresh();
         await vscode.commands.executeCommand(
           "vscodeBigtable_command_openTable",
           tableInfo.id
         );
+        return tableInfo.id;
       } catch (err: any) {
         vscode.window.showErrorMessage(
           `Error: Unable to add bigtable. ${err.message}`,
@@ -110,7 +123,8 @@ export function activate(context: vscode.ExtensionContext) {
     tablesListTreeview,
     addStoredTableCommand,
     deleteStoredTableCommand,
-    openTableCommand
+    openTableCommand,
+    openConfigureCommand
   );
 }
 

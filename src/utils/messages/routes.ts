@@ -1,7 +1,7 @@
 import { Message } from "../../shared.types";
 import { getRows, GetRowsParams } from "../bigtable";
 import * as vscode from "vscode";
-import type { StoredTableInfo } from "../storage";
+import { getStoredTable, StoredTableInfo } from "../storage";
 
 /**
  *
@@ -12,9 +12,11 @@ import type { StoredTableInfo } from "../storage";
  * @param message: The message received from the client webview
  * @returns payload of the response message
  */
-export const createRouter =
-  <T extends Record<string, any>>(pageContext: T) =>
-  async (message: Message) => {
+export function createRouter<T extends Record<string, any>>(
+  pageContext: T,
+  extensionContext: vscode.ExtensionContext
+) {
+  const router = async (message: Message) => {
     switch (message.route) {
       case "ping": {
         return { pong: true };
@@ -22,12 +24,18 @@ export const createRouter =
       case "context": {
         return pageContext;
       }
+      case "getSavedTable": {
+        const storedTableId = message.payload?.id as string;
+        const storedTableInfo = getStoredTable(extensionContext, storedTableId);
+        return storedTableInfo;
+      }
       case "createSavedTable": {
         const tableInfo = message.payload as StoredTableInfo;
-        await vscode.commands.executeCommand(
+        const id = await vscode.commands.executeCommand(
           "vscodeBigtable_command_addStoredTable",
           JSON.stringify(tableInfo)
         );
+        return { id };
       }
       case "getRows": {
         const { payload } = message as Message<GetRowsParams>;
@@ -47,3 +55,5 @@ export const createRouter =
     }
     return null;
   };
+  return router;
+}

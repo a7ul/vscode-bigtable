@@ -37,8 +37,10 @@ export class WebviewEngine {
   }
 
   async createTablePanel(tableInfo: StoredTableInfo) {
-    if (this.panels[tableInfo.id]) {
-      return this.panels[tableInfo.id];
+    const existingPanel = this.panels[tableInfo.id];
+    if (existingPanel) {
+      existingPanel.reveal(existingPanel?.viewColumn);
+      return existingPanel;
     }
 
     const panel = vscode.window.createWebviewPanel(
@@ -58,11 +60,11 @@ export class WebviewEngine {
       "table.svg"
     );
 
-    const pageContext = {
-      page: "query",
-      table: tableInfo,
-    };
-    this.setupMessageQueue(panel, createRouter(pageContext));
+    const router = createRouter(
+      { page: "query", table: tableInfo },
+      this.context
+    );
+    this.setupMessageQueue(panel, router);
     panel.webview.html = await this.loadLocalWebviewHtml();
 
     this.context.subscriptions.push(panel);
@@ -79,15 +81,16 @@ export class WebviewEngine {
   }
 
   async createConfigurePanel(storedTableId: string | undefined) {
-    const panelId = "configure:view";
-
-    if (this.panels[panelId]) {
-      return this.panels[panelId];
+    const panelId = `configure:view:${storedTableId}`;
+    const existingPanel = this.panels[panelId];
+    if (existingPanel) {
+      existingPanel.reveal(existingPanel?.viewColumn);
+      return existingPanel;
     }
 
     const panel = vscode.window.createWebviewPanel(
       "CONFIGURE",
-      "Bigtable",
+      "Configure Bigtable",
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -103,8 +106,11 @@ export class WebviewEngine {
       "setting.svg"
     );
 
-    const context = { page: "configure", storedTableId };
-    this.setupMessageQueue(panel, createRouter(context));
+    const router = createRouter(
+      { page: "configure", storedTableId },
+      this.context
+    );
+    this.setupMessageQueue(panel, router);
     panel.webview.html = await this.loadLocalWebviewHtml();
 
     this.context.subscriptions.push(panel);

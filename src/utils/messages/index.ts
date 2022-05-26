@@ -8,10 +8,7 @@ export type BackendMessageHandler = (
 export function createWebviewMessageQueueBackend(
   handler: BackendMessageHandler
 ) {
-  return function listen(
-    context: vscode.ExtensionContext,
-    panel: WebviewPanel
-  ) {
+  const listen = (context: vscode.ExtensionContext, panel: WebviewPanel) => {
     panel.webview.onDidReceiveMessage(
       async (message: Message) => {
         try {
@@ -40,4 +37,5 @@ export function createWebviewMessageQueueBackend(
       context.subscriptions
     );
   };
+  return listen;
 }

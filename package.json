@@ -65,6 +65,12 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "vscodeBigtable_views_storedTableList",
+        "contents": "You have no saved tables yet. \nChoose a table from the GCP projects below. \n Or \n [Add Bigtable manually](command:vscodeBigtable_command_openConfigureTable)"
+      }
+    ],
     "menus": {
       "commandPalette": [
         {
@@ -83,6 +89,10 @@
       "view/item/context": [
         {
           "command": "vscodeBigtable_command_deleteStoredTable",
+          "when": "view == vscodeBigtable_views_storedTableList && viewItem == table"
+        },
+        {
+          "command": "vscodeBigtable_command_openConfigureTable",
           "when": "view == vscodeBigtable_views_storedTableList && viewItem == table"
         }
       ],
