@@ -1,5 +1,9 @@
 # vscode-bigtable
 
+<a href="https://marketplace.visualstudio.com/items?itemName=a7ul.vscode-bigtable" ><img src="https://img.shields.io/badge/Install%20for%20VSCode-vscode--bigtable-blue?style=for-the-badge" /></a>
+
+<a href="https://open-vsx.org/extension/a7ul/vscode-bigtable" ><img src="https://img.shields.io/badge/Install%20via%20OpenVSX-vscode--bigtable-purple?style=for-the-badge" /></a>
+
 <img src="resources/icon.png" width="70" />
 
 VSCode extension to query and manage Google Bigtable instances.
